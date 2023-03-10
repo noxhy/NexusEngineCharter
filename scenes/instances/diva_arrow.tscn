@@ -1,0 +1,72 @@
+[gd_scene load_steps=6 format=3 uid="uid://nwooi35cvib0"]
+
+[ext_resource type="Script" path="res://scenes/instances/diva_arrow.gd" id="1_jxgtf"]
+[ext_resource type="Texture2D" uid="uid://cl472yiwsoy16" path="res://assets/sprites/arrow/diva_arrow/diva_note.png" id="2_lhw10"]
+[ext_resource type="Texture2D" uid="uid://5dyumus80v8l" path="res://assets/sprites/arrow/diva_arrow/diva_outline.png" id="3_vdhyb"]
+[ext_resource type="Texture2D" uid="uid://dxei74nj2ghsi" path="res://assets/sprites/arrow/default_arrows/chart_tail.png" id="4_f4k1x"]
+[ext_resource type="Texture2D" uid="uid://c1jsfe6btwl3m" path="res://assets/sprites/arrow/default_arrows/chart_tail_end.png" id="5_puuw3"]
+
+[node name="Arrow" type="Node2D"]
+script = ExtResource("1_jxgtf")
+
+[node name="Arrow" type="Sprite2D" parent="."]
+modulate = Color(1, 0, 0, 1)
+self_modulate = Color(0.454902, 0.454902, 0.454902, 1)
+position = Vector2(-3.05176e-05, -3.05176e-05)
+scale = Vector2(0.116667, 0.116667)
+texture = ExtResource("2_lhw10")
+
+[node name="Outline" type="Sprite2D" parent="."]
+z_index = 1
+scale = Vector2(0.117, 0.117)
+texture = ExtResource("3_vdhyb")
+
+[node name="Line2D" type="Line2D" parent="."]
+points = PackedVector2Array(0, 0, 0, 96)
+width = 50.0
+texture = ExtResource("4_f4k1x")
+texture_mode = 1
+joint_mode = 2
+
+[node name="Tail End" type="Sprite2D" parent="Line2D"]
+position = Vector2(0, 96)
+rotation = 1.5708
+scale = Vector2(0.0824167, 0.0824167)
+texture = ExtResource("5_puuw3")
+centered = false
+offset = Vector2(0, -300)
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
+position = Vector2(-23.7461, -23.8779)
+scale = Vector2(1.08789, 1.09033)
+rect = Rect2(-10, -10, 64, 64)
+
+[node name="Label" type="Label" parent="."]
+offset_left = -35.0
+offset_top = -35.0
+offset_right = 35.0
+offset_bottom = 35.0
+theme_override_font_sizes/font_size = 32
+text = "#"
+horizontal_alignment = 1
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 1
+
+[node name="Arrow Display" type="Node2D" parent="."]
+
+[node name="Arrow" type="Sprite2D" parent="Arrow Display"]
+self_modulate = Color(1, 0, 0, 1)
+position = Vector2(-3.05176e-05, -3.05176e-05)
+scale = Vector2(0.116667, 0.116667)
+texture = ExtResource("2_lhw10")
+metadata/_edit_lock_ = true
+
+[node name="Outline" type="Sprite2D" parent="Arrow Display/Arrow"]
+position = Vector2(0.000261579, 0.000261579)
+scale = Vector2(1.00285, 1.00285)
+texture = ExtResource("3_vdhyb")
+metadata/_edit_lock_ = true
+
+[connection signal="screen_entered" from="VisibleOnScreenNotifier2D" to="." method="_on_visible_on_screen_notifier_2d_screen_entered"]
+[connection signal="screen_exited" from="VisibleOnScreenNotifier2D" to="." method="_on_visible_on_screen_notifier_2d_screen_exited"]

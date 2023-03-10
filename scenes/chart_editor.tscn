@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://crt0nq2x80ak5"]
+[gd_scene load_steps=19 format=3 uid="uid://887d7k8cv0i1"]
 
 [ext_resource type="Script" path="res://scenes/Chart Editor.gd" id="1_dhekv"]
 [ext_resource type="Script" path="res://scenes/instances/Conductor.gd" id="2_jl6p8"]
@@ -15,11 +15,11 @@
 [ext_resource type="Texture2D" uid="uid://hf58qhc23n5c" path="res://assets/sprites/ui/icons/fast_forward_button.png" id="12_rdgd4"]
 [ext_resource type="Texture2D" uid="uid://dwtgyv6xf866j" path="res://assets/sprites/ui/icons/skip_button.png" id="13_hvp23"]
 [ext_resource type="PackedScene" uid="uid://bqvpb5cj4splj" path="res://scenes/instances/grid.tscn" id="14_6mdnm"]
-[ext_resource type="Shader" path="res://among_is.gdshader" id="15_xtpyv"]
+[ext_resource type="Shader" path="res://scrolling.gdshader" id="16_3r7nt"]
 [ext_resource type="Texture2D" uid="uid://bta0ikrp7hrkn" path="res://assets/sprites/ui/background/tile.png" id="16_b6555"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_u3o50"]
-shader = ExtResource("15_xtpyv")
+shader = ExtResource("16_3r7nt")
 shader_parameter/motion = Vector2(-1, 0.196)
 shader_parameter/scale = 0.2
 shader_parameter/offset = Vector2(0, 0)

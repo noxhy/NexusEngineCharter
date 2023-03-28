@@ -1,4 +1,4 @@
-# Before Submitting an issue, be sure that it's not a Godot 4 issue, as it is a beta version.
+# Before Submitting an issue, be sure that it's not a Godot 4 issue.
 
 # Nexus Engine 2 Chart Editor
 Chart Editor for Nexus Engine 2 made in Godot 4 (As of now RC 5).

@@ -1,0 +1,32 @@
+[remap]
+
+importer="font_data_dynamic"
+type="FontFile"
+uid="uid://dd5ogn3mojw73"
+path="res://.godot/imported/Normal Text.ttf-81bbadbf26c810d6f053562bd96d6122.fontdata"
+
+[deps]
+
+source_file="res://fonts/Normal Text.ttf"
+dest_files=["res://.godot/imported/Normal Text.ttf-81bbadbf26c810d6f053562bd96d6122.fontdata"]
+
+[params]
+
+Rendering=null
+antialiasing=1
+generate_mipmaps=true
+multichannel_signed_distance_field=false
+msdf_pixel_range=8
+msdf_size=48
+force_autohinter=false
+hinting=1
+subpixel_positioning=1
+oversampling=0.0
+Fallbacks=null
+fallbacks=[]
+Compress=null
+compress=true
+preload=[]
+language_support={}
+script_support={}
+opentype_features={}

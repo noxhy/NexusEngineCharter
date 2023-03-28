@@ -1,0 +1,41 @@
+[gd_scene load_steps=3 format=3 uid="uid://bhrrrxg6jhxja"]
+
+[ext_resource type="Script" path="res://scenes/instances/meters_list_node.gd" id="1_v0cjk"]
+[ext_resource type="Theme" uid="uid://bebg8dyoq0am0" path="res://chart_editor.tres" id="2_0cmrq"]
+
+[node name="Meter List Node" type="PanelContainer" node_paths=PackedStringArray("host")]
+custom_minimum_size = Vector2i(256, 24)
+offset_right = 256.0
+offset_bottom = 26.0
+script = ExtResource("1_v0cjk")
+host = NodePath("")
+
+[node name="Time" type="Label" parent="."]
+custom_minimum_size = Vector2i(96, 0)
+offset_right = 96.0
+offset_bottom = 26.0
+size_flags_horizontal = 0
+text = "0:00.023"
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 1
+
+[node name="Tempo" type="Label" parent="."]
+custom_minimum_size = Vector2i(64, 0)
+offset_left = 96.0
+offset_right = 160.0
+offset_bottom = 26.0
+size_flags_horizontal = 4
+text = "4/16"
+vertical_alignment = 1
+
+[node name="Delete Buttom" type="Button" parent="."]
+custom_minimum_size = Vector2i(64, 0)
+offset_left = 192.0
+offset_right = 256.0
+offset_bottom = 26.0
+size_flags_horizontal = 8
+theme = ExtResource("2_0cmrq")
+text = "Delete"
+
+[connection signal="pressed" from="Delete Buttom" to="." method="_on_delete_buttom_pressed"]

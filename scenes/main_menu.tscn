@@ -1,0 +1,80 @@
+[gd_scene load_steps=3 format=3 uid="uid://j56vfo6ycgii"]
+
+[ext_resource type="Texture2D" uid="uid://ctpvxy1q8bue1" path="res://assets/sprites/ui/background/menuDesat.png" id="1_6lmf3"]
+[ext_resource type="Script" path="res://scenes/main_menu.gd" id="1_cugs7"]
+
+[node name="Main Menu" type="Node2D"]
+script = ExtResource("1_cugs7")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(640, 360)
+metadata/_edit_lock_ = true
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="PopupMenu" type="PopupMenu" parent="UI"]
+title = "What'll it be?"
+position = Vector2i(384, 232)
+size = Vector2i(512, 256)
+visible = true
+always_on_top = true
+min_size = Vector2i(512, 256)
+content_scale_aspect = 1
+hide_on_state_item_selection = true
+item_count = 3
+item_0/text = "Create New Chart"
+item_0/checkable = 2
+item_0/id = 0
+item_1/text = "Open Chart File"
+item_1/checkable = 2
+item_1/id = 1
+item_2/text = "Convert Friday Night Funkin' Chart"
+item_2/checkable = 2
+item_2/id = 2
+
+[node name="Open Chart File" type="FileDialog" parent="UI"]
+title = "Open a File"
+position = Vector2i(370, 200)
+size = Vector2i(540, 400)
+unresizable = true
+always_on_top = true
+min_size = Vector2i(320, 320)
+ok_button_text = "Open"
+dialog_hide_on_ok = true
+file_mode = 0
+access = 2
+root_subfolder = "res://"
+filters = PackedStringArray("*.tres")
+
+[node name="ParallaxBackground" type="ParallaxBackground" parent="."]
+layer = 0
+offset = Vector2(640, 360)
+transform = Transform2D(1, 0, 0, 1, 640, 360)
+
+[node name="ParallaxLayer" type="ParallaxLayer" parent="ParallaxBackground"]
+z_index = -2
+motion_mirroring = Vector2(1280, 0)
+
+[node name="Background" type="Sprite2D" parent="ParallaxBackground/ParallaxLayer"]
+modulate = Color(0.439216, 0.439216, 0.72549, 1)
+texture = ExtResource("1_6lmf3")
+metadata/_edit_lock_ = true
+
+[node name="ColorRect" type="ColorRect" parent="ParallaxBackground"]
+offset_left = -640.0
+offset_top = -360.0
+offset_right = 640.0
+offset_bottom = -232.0
+color = Color(0.0352941, 0.0352941, 0.0352941, 0.74902)
+metadata/_edit_lock_ = true
+
+[node name="ColorRect2" type="ColorRect" parent="ParallaxBackground"]
+offset_left = -640.0
+offset_top = 280.0
+offset_right = 640.0
+offset_bottom = 360.0
+color = Color(0.0352941, 0.0352941, 0.0352941, 0.74902)
+metadata/_edit_lock_ = true
+
+[connection signal="id_pressed" from="UI/PopupMenu" to="." method="_on_popup_menu_id_pressed"]
+[connection signal="file_selected" from="UI/Open Chart File" to="." method="_on_open_chart_file_file_selected"]

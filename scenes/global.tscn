@@ -1,0 +1,23 @@
+[gd_scene load_steps=3 format=3 uid="uid://dvi652ojyqb7g"]
+
+[ext_resource type="Script" path="res://scenes/Global.gd" id="1_dac4u"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_j0xkf"]
+font_size = 12
+outline_size = 6
+outline_color = Color(0, 0, 0, 1)
+shadow_size = 0
+
+[node name="Global" type="Node"]
+script = ExtResource("1_dac4u")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+layer = 4
+
+[node name="Performance" type="Label" parent="CanvasLayer"]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 120.0
+offset_bottom = 56.0
+text = "NE CE v1.0"
+label_settings = SubResource("LabelSettings_j0xkf")

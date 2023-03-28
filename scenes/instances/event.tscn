@@ -1,0 +1,47 @@
+[gd_scene load_steps=4 format=3 uid="uid://bhmwmi56ekwg0"]
+
+[ext_resource type="Script" path="res://scenes/instances/event.gd" id="1_yglpv"]
+[ext_resource type="Texture2D" uid="uid://duf70f3x4akcv" path="res://assets/sprites/arrow/default_arrows/chart_event.png" id="2_07tpk"]
+[ext_resource type="Texture2D" uid="uid://o4pb3lbb7ma0" path="res://assets/sprites/arrow/default_arrows/chart_event_outline.png" id="3_v801a"]
+
+[node name="Event" type="Node2D"]
+script = ExtResource("1_yglpv")
+
+[node name="Event" type="Sprite2D" parent="."]
+modulate = Color(1, 0, 0, 1)
+position = Vector2(-3.05176e-05, -3.05176e-05)
+scale = Vector2(0.116667, 0.116667)
+z_index = 1
+texture = ExtResource("2_07tpk")
+
+[node name="Outline" type="Sprite2D" parent="."]
+scale = Vector2(0.117, 0.117)
+z_index = 1
+texture = ExtResource("3_v801a")
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
+position = Vector2(-23.7461, -23.8779)
+scale = Vector2(1.08789, 1.09033)
+rect = Rect2(-10, -10, 64, 64)
+
+[node name="Label" type="Label" parent="."]
+modulate = Color(1, 1, 1, 0.603922)
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -35.0
+offset_right = -62.0
+offset_bottom = 35.0
+grow_horizontal = 0
+grow_vertical = 2
+size_flags_horizontal = 8
+text = "Event Name
+Event Parameters"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[connection signal="screen_entered" from="VisibleOnScreenNotifier2D" to="." method="_on_visible_on_screen_notifier_2d_screen_entered"]
+[connection signal="screen_exited" from="VisibleOnScreenNotifier2D" to="." method="_on_visible_on_screen_notifier_2d_screen_exited"]

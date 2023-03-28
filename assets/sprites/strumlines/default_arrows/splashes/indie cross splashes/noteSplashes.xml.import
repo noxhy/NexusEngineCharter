@@ -1,0 +1,20 @@
+[remap]
+
+importer="sparrow.atlas.importer"
+type="SpriteFrames"
+path="res://.import/noteSplashes.xml-09d86c5fe5094cee4ab1ea28c1604e73.tres"
+
+[deps]
+
+source_file="res://sprites/arrow/default_arrows/splashes/indie cross splashes/noteSplashes.xml"
+dest_files=[ "res://.import/noteSplashes.xml-09d86c5fe5094cee4ab1ea28c1604e73.tres" ]
+
+[params]
+
+group_frames=true
+image_file_format="png"
+default_fps=10
+custom_anim_fps={
+}
+custom_anim_loop={
+}

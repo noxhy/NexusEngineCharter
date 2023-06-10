@@ -21,7 +21,7 @@ always_on_top = true
 min_size = Vector2i(512, 256)
 content_scale_aspect = 1
 hide_on_state_item_selection = true
-item_count = 3
+item_count = 4
 item_0/text = "Create New Chart"
 item_0/checkable = 2
 item_0/id = 0
@@ -31,8 +31,25 @@ item_1/id = 1
 item_2/text = "Convert Friday Night Funkin' Chart"
 item_2/checkable = 2
 item_2/id = 2
+item_3/text = "Open Event Edior (Chart File Required)"
+item_3/checkable = 2
+item_3/id = 3
 
 [node name="Open Chart File" type="FileDialog" parent="UI"]
+title = "Open a File"
+position = Vector2i(370, 200)
+size = Vector2i(540, 400)
+unresizable = true
+always_on_top = true
+min_size = Vector2i(320, 320)
+ok_button_text = "Open"
+dialog_hide_on_ok = true
+file_mode = 0
+access = 2
+root_subfolder = "res://"
+filters = PackedStringArray("*.tres")
+
+[node name="Open Chart File Event Editor" type="FileDialog" parent="UI"]
 title = "Open a File"
 position = Vector2i(370, 200)
 size = Vector2i(540, 400)
@@ -78,3 +95,4 @@ metadata/_edit_lock_ = true
 
 [connection signal="id_pressed" from="UI/PopupMenu" to="." method="_on_popup_menu_id_pressed"]
 [connection signal="file_selected" from="UI/Open Chart File" to="." method="_on_open_chart_file_file_selected"]
+[connection signal="file_selected" from="UI/Open Chart File Event Editor" to="." method="_on_open_chart_file_event_editor_file_selected"]

@@ -9,14 +9,14 @@ script = ExtResource("1_yglpv")
 
 [node name="Event" type="Sprite2D" parent="."]
 modulate = Color(1, 0, 0, 1)
+z_index = 1
 position = Vector2(-3.05176e-05, -3.05176e-05)
 scale = Vector2(0.116667, 0.116667)
-z_index = 1
 texture = ExtResource("2_07tpk")
 
 [node name="Outline" type="Sprite2D" parent="."]
-scale = Vector2(0.117, 0.117)
 z_index = 1
+scale = Vector2(0.117, 0.117)
 texture = ExtResource("3_v801a")
 
 [node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]

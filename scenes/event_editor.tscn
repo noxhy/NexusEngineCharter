@@ -1,0 +1,757 @@
+[gd_scene load_steps=19 format=3 uid="uid://dchb8m3j6liil"]
+
+[ext_resource type="Script" path="res://scenes/event_editor.gd" id="1_4ngtw"]
+[ext_resource type="AudioStream" uid="uid://bodc4sfit172e" path="res://assets/sounds/chart editor/sound-hit.wav" id="2_rsvsx"]
+[ext_resource type="Script" path="res://scenes/instances/Conductor.gd" id="3_xeeap"]
+[ext_resource type="AudioStream" uid="uid://bhbl74dwlqyhk" path="res://assets/sounds/conductor/conductor sfx.mp3" id="4_m7ww4"]
+[ext_resource type="Theme" uid="uid://bebg8dyoq0am0" path="res://chart_editor.tres" id="5_e1v1b"]
+[ext_resource type="Script" path="res://scenes/draggable_tab.gd" id="6_v2kdd"]
+[ext_resource type="FontFile" uid="uid://dd5ogn3mojw73" path="res://fonts/Normal Text.ttf" id="7_dikcn"]
+[ext_resource type="Texture2D" uid="uid://dpb5afc48uqvb" path="res://assets/sprites/ui/icons/restart_button.png" id="8_2baq7"]
+[ext_resource type="Texture2D" uid="uid://c7ka0o15iv6a3" path="res://assets/sprites/ui/icons/rewind_button.png" id="9_1kf1r"]
+[ext_resource type="Texture2D" uid="uid://byl3boevtc02p" path="res://assets/sprites/ui/icons/play_button.png" id="10_akjbx"]
+[ext_resource type="Texture2D" uid="uid://c1mgxe0dqdbgh" path="res://assets/sprites/ui/icons/pause_button.png" id="11_kpowo"]
+[ext_resource type="Texture2D" uid="uid://hf58qhc23n5c" path="res://assets/sprites/ui/icons/fast_forward_button.png" id="12_a7qml"]
+[ext_resource type="Texture2D" uid="uid://dwtgyv6xf866j" path="res://assets/sprites/ui/icons/skip_button.png" id="13_wohrt"]
+[ext_resource type="PackedScene" uid="uid://bqvpb5cj4splj" path="res://scenes/instances/grid.tscn" id="14_cmano"]
+[ext_resource type="Texture2D" uid="uid://ctpvxy1q8bue1" path="res://assets/sprites/ui/background/menuDesat.png" id="15_7vd83"]
+[ext_resource type="Shader" path="res://scrolling.gdshader" id="16_jyim6"]
+[ext_resource type="Texture2D" uid="uid://bta0ikrp7hrkn" path="res://assets/sprites/ui/background/tile.png" id="17_d14d7"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_u3o50"]
+shader = ExtResource("16_jyim6")
+shader_parameter/motion = Vector2(-1, 0.196)
+shader_parameter/scale = 0.2
+shader_parameter/offset = Vector2(0, 0)
+
+[node name="Event Editor" type="Node2D"]
+editor_description = "The Nexus Engine Chart Editor"
+z_index = 2000
+z_as_relative = false
+script = ExtResource("1_4ngtw")
+strum_count = 4
+highlight_color = Color(0.266667, 0.254902, 0.803922, 0.337255)
+metadata/_edit_horizontal_guides_ = []
+
+[node name="Hit Sound" type="AudioStreamPlayer" parent="."]
+unique_name_in_owner = true
+stream = ExtResource("2_rsvsx")
+bus = &"SFX"
+
+[node name="Music" type="Node" parent="."]
+
+[node name="Vocals" type="AudioStreamPlayer" parent="Music"]
+bus = &"Music"
+
+[node name="Instrumental" type="AudioStreamPlayer" parent="Music"]
+bus = &"Music"
+
+[node name="Conductor" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("3_xeeap")
+stream_player = NodePath("../Music/Instrumental")
+
+[node name="Measure Sound" type="AudioStreamPlayer" parent="Conductor"]
+stream = ExtResource("4_m7ww4")
+pitch_scale = 1.5
+bus = &"SFX"
+
+[node name="Beat Sound" type="AudioStreamPlayer" parent="Conductor"]
+stream = ExtResource("4_m7ww4")
+bus = &"SFX"
+
+[node name="Step Sound" type="AudioStreamPlayer" parent="Conductor"]
+stream = ExtResource("4_m7ww4")
+pitch_scale = 2.0
+bus = &"SFX"
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(640, 360)
+ignore_rotation = false
+limit_smoothed = true
+drag_top_margin = 0.5
+metadata/_edit_lock_ = true
+
+[node name="UI" type="CanvasLayer" parent="."]
+layer = 2
+offset = Vector2(640, 360)
+transform = Transform2D(1, 0, 0, 1, 640, 360)
+
+[node name="Conductor Stats" type="TabContainer" parent="UI"]
+anchors_preset = -1
+anchor_left = -0.5
+anchor_top = -0.322222
+anchor_right = -0.35
+anchor_bottom = -0.0888889
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("5_e1v1b")
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+script = ExtResource("6_v2kdd")
+metadata/_edit_use_anchors_ = true
+
+[node name="Details" type="TabBar" parent="UI/Conductor Stats"]
+layout_mode = 2
+
+[node name="Details" type="Label" parent="UI/Conductor Stats/Details"]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("5_e1v1b")
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+text = "Details
+"
+
+[node name="Conductor" type="TabBar" parent="UI/Conductor Stats"]
+visible = false
+layout_mode = 2
+
+[node name="Conductor Stats" type="Label" parent="UI/Conductor Stats/Conductor"]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("5_e1v1b")
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+text = "Details
+"
+metadata/_edit_layout_mode = 1
+
+[node name="Brush Settings" type="TabContainer" parent="UI"]
+anchors_preset = -1
+anchor_left = -0.5
+anchor_top = -0.331944
+anchor_right = -0.35
+anchor_bottom = -0.122222
+offset_top = 192.0
+offset_bottom = 192.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("5_e1v1b")
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+script = ExtResource("6_v2kdd")
+metadata/_edit_use_anchors_ = true
+
+[node name="Event Brush" type="TabBar" parent="UI/Brush Settings"]
+layout_mode = 2
+
+[node name="Event Name" type="LineEdit" parent="UI/Brush Settings/Event Brush"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 5.0
+offset_right = 184.0
+offset_bottom = 30.0
+focus_mode = 1
+placeholder_text = "Event Name"
+context_menu_enabled = false
+virtual_keyboard_enabled = false
+
+[node name="Event Parameters" type="TextEdit" parent="UI/Brush Settings/Event Brush"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 37.0
+offset_right = 184.0
+offset_bottom = 117.0
+focus_mode = 1
+placeholder_text = "Event Parameters
+Separated by Newline"
+context_menu_enabled = false
+
+[node name="Charting Tabs" type="TabContainer" parent="UI"]
+offset_left = 386.0
+offset_top = -232.0
+offset_right = 642.0
+offset_bottom = 104.0
+theme = ExtResource("5_e1v1b")
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 8
+script = ExtResource("6_v2kdd")
+
+[node name="Editor" type="TabBar" parent="UI/Charting Tabs"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("7_dikcn")
+
+[node name="Beat Sounds Check Box" type="CheckBox" parent="UI/Charting Tabs/Editor"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 14.0
+offset_right = 118.0
+offset_bottom = 38.0
+focus_mode = 0
+theme_override_font_sizes/font_size = 12
+button_pressed = true
+text = "Beat Sounds"
+
+[node name="Step Sounds Check Box" type="CheckBox" parent="UI/Charting Tabs/Editor"]
+layout_mode = 0
+offset_left = 126.0
+offset_top = 14.0
+offset_right = 236.0
+offset_bottom = 38.0
+focus_mode = 0
+theme_override_font_sizes/font_size = 12
+text = "Step Sounds"
+
+[node name="Vocals Slider" type="HSlider" parent="UI/Charting Tabs/Editor"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 55.0
+offset_right = 118.0
+offset_bottom = 87.0
+min_value = -80.0
+max_value = 0.0
+
+[node name="Label" type="Label" parent="UI/Charting Tabs/Editor/Vocals Slider"]
+layout_mode = 0
+offset_top = -16.0
+offset_right = 240.0
+offset_bottom = 11.0
+theme_override_font_sizes/font_size = 12
+text = "Vocals Volume"
+vertical_alignment = 1
+metadata/_edit_lock_ = true
+
+[node name="Instrumental Slider" type="HSlider" parent="UI/Charting Tabs/Editor"]
+layout_mode = 0
+offset_left = 126.0
+offset_top = 55.0
+offset_right = 236.0
+offset_bottom = 87.0
+min_value = -80.0
+max_value = 0.0
+
+[node name="Label" type="Label" parent="UI/Charting Tabs/Editor/Instrumental Slider"]
+layout_mode = 0
+offset_top = -16.0
+offset_right = 240.0
+offset_bottom = 11.0
+theme_override_font_sizes/font_size = 12
+text = "Instrumental Volume"
+vertical_alignment = 1
+metadata/_edit_lock_ = true
+
+[node name="Speed Slider" type="HSlider" parent="UI/Charting Tabs/Editor"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 94.0
+offset_right = 236.0
+offset_bottom = 126.0
+min_value = 0.1
+max_value = 2.0
+step = 0.1
+value = 1.0
+
+[node name="Label" type="Label" parent="UI/Charting Tabs/Editor/Speed Slider"]
+layout_mode = 0
+offset_top = -16.0
+offset_right = 240.0
+offset_bottom = 11.0
+theme_override_font_sizes/font_size = 12
+text = "Playback Speed"
+vertical_alignment = 1
+metadata/_edit_lock_ = true
+
+[node name="SaveButton" type="Button" parent="UI/Charting Tabs/Editor"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 134.0
+offset_right = 113.0
+offset_bottom = 158.0
+focus_mode = 0
+theme_override_font_sizes/font_size = 12
+text = "Save Chart"
+
+[node name="Tempo" type="TabBar" parent="UI/Charting Tabs"]
+visible = false
+layout_mode = 2
+
+[node name="Time Edit" type="LineEdit" parent="UI/Charting Tabs/Tempo"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 14.0
+offset_right = 126.0
+offset_bottom = 38.0
+theme_override_font_sizes/font_size = 12
+placeholder_text = "Time (seconds)"
+
+[node name="Tempo Edit" type="LineEdit" parent="UI/Charting Tabs/Tempo"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 54.0
+offset_right = 126.0
+offset_bottom = 78.0
+theme_override_font_sizes/font_size = 12
+placeholder_text = "Tempo"
+
+[node name="Add Tempo" type="Button" parent="UI/Charting Tabs/Tempo"]
+layout_mode = 0
+offset_left = 166.0
+offset_top = 30.0
+offset_right = 211.0
+offset_bottom = 55.0
+focus_mode = 0
+text = "Add"
+
+[node name="ColorRect" type="ColorRect" parent="UI/Charting Tabs/Tempo/Add Tempo"]
+layout_mode = 0
+offset_left = -32.0
+offset_top = -8.0
+offset_right = -12.0
+offset_bottom = -4.0
+metadata/_edit_lock_ = true
+
+[node name="ColorRect2" type="ColorRect" parent="UI/Charting Tabs/Tempo/Add Tempo"]
+layout_mode = 0
+offset_left = -32.0
+offset_top = 32.0
+offset_right = -12.0
+offset_bottom = 36.0
+metadata/_edit_lock_ = true
+
+[node name="ColorRect3" type="ColorRect" parent="UI/Charting Tabs/Tempo/Add Tempo"]
+layout_mode = 0
+offset_left = -12.0
+offset_top = -8.0
+offset_right = -8.0
+offset_bottom = 36.0
+metadata/_edit_lock_ = true
+
+[node name="Time Label" type="Label" parent="UI/Charting Tabs/Tempo"]
+layout_mode = 0
+offset_left = -2.0
+offset_top = 102.0
+offset_right = 62.0
+offset_bottom = 142.0
+text = "Time"
+metadata/_edit_lock_ = true
+
+[node name="Tempo Label" type="Label" parent="UI/Charting Tabs/Tempo"]
+layout_mode = 0
+offset_left = 94.0
+offset_top = 102.0
+offset_right = 158.0
+offset_bottom = 142.0
+text = "Tempo
+"
+metadata/_edit_lock_ = true
+
+[node name="ScrollContainer" type="ScrollContainer" parent="UI/Charting Tabs/Tempo"]
+layout_mode = 0
+offset_left = -2.0
+offset_top = 142.0
+offset_right = 254.0
+offset_bottom = 294.0
+horizontal_scroll_mode = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/Charting Tabs/Tempo/ScrollContainer"]
+show_behind_parent = true
+layout_mode = 2
+
+[node name="Meter" type="TabBar" parent="UI/Charting Tabs"]
+visible = false
+layout_mode = 2
+
+[node name="Time Edit" type="LineEdit" parent="UI/Charting Tabs/Meter"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 14.0
+offset_right = 126.0
+offset_bottom = 38.0
+theme_override_font_sizes/font_size = 12
+placeholder_text = "Time (seconds)"
+
+[node name="Beat Edit" type="LineEdit" parent="UI/Charting Tabs/Meter"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 54.0
+offset_right = 126.0
+offset_bottom = 78.0
+theme_override_font_sizes/font_size = 12
+placeholder_text = "Meter (B/S)"
+
+[node name="Add Meter" type="Button" parent="UI/Charting Tabs/Meter"]
+layout_mode = 0
+offset_left = 166.0
+offset_top = 30.0
+offset_right = 211.0
+offset_bottom = 55.0
+focus_mode = 0
+text = "Add"
+
+[node name="ColorRect" type="ColorRect" parent="UI/Charting Tabs/Meter/Add Meter"]
+layout_mode = 0
+offset_left = -32.0
+offset_top = -8.0
+offset_right = -12.0
+offset_bottom = -4.0
+metadata/_edit_lock_ = true
+
+[node name="ColorRect2" type="ColorRect" parent="UI/Charting Tabs/Meter/Add Meter"]
+layout_mode = 0
+offset_left = -32.0
+offset_top = 32.0
+offset_right = -12.0
+offset_bottom = 36.0
+metadata/_edit_lock_ = true
+
+[node name="ColorRect3" type="ColorRect" parent="UI/Charting Tabs/Meter/Add Meter"]
+layout_mode = 0
+offset_left = -12.0
+offset_top = -8.0
+offset_right = -8.0
+offset_bottom = 36.0
+metadata/_edit_lock_ = true
+
+[node name="Time Label" type="Label" parent="UI/Charting Tabs/Meter"]
+layout_mode = 0
+offset_left = -2.0
+offset_top = 102.0
+offset_right = 62.0
+offset_bottom = 142.0
+text = "Time"
+
+[node name="Meter Label" type="Label" parent="UI/Charting Tabs/Meter"]
+layout_mode = 0
+offset_left = 94.0
+offset_top = 102.0
+offset_right = 158.0
+offset_bottom = 142.0
+text = "Meter
+"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="UI/Charting Tabs/Meter"]
+layout_mode = 0
+offset_left = -2.0
+offset_top = 142.0
+offset_right = 254.0
+offset_bottom = 294.0
+horizontal_scroll_mode = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/Charting Tabs/Meter/ScrollContainer"]
+show_behind_parent = true
+layout_mode = 2
+
+[node name="Chart" type="TabBar" parent="UI/Charting Tabs"]
+visible = false
+layout_mode = 2
+
+[node name="Strum Text" type="LineEdit" parent="UI/Charting Tabs/Chart"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 14.0
+offset_right = 110.0
+offset_bottom = 39.0
+theme_override_font_sizes/font_size = 12
+placeholder_text = "Strum Count"
+
+[node name="Set Strum" type="Button" parent="UI/Charting Tabs/Chart/Strum Text"]
+layout_mode = 0
+offset_left = 118.0
+offset_right = 157.0
+offset_bottom = 25.0
+focus_mode = 0
+text = "Set
+"
+
+[node name="Scroll Speed" type="LineEdit" parent="UI/Charting Tabs/Chart"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 54.0
+offset_right = 110.0
+offset_bottom = 79.0
+theme_override_font_sizes/font_size = 12
+placeholder_text = "Scroll Speed"
+
+[node name="Set Scroll Speed" type="Button" parent="UI/Charting Tabs/Chart/Scroll Speed"]
+layout_mode = 0
+offset_left = 118.0
+offset_right = 157.0
+offset_bottom = 25.0
+focus_mode = 0
+text = "Set
+"
+
+[node name="Offset" type="LineEdit" parent="UI/Charting Tabs/Chart"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 94.0
+offset_right = 110.0
+offset_bottom = 119.0
+theme_override_font_sizes/font_size = 12
+placeholder_text = "Offset"
+
+[node name="Offset Button" type="Button" parent="UI/Charting Tabs/Chart/Offset"]
+layout_mode = 0
+offset_left = 118.0
+offset_right = 157.0
+offset_bottom = 25.0
+focus_mode = 0
+text = "Set
+"
+
+[node name="Song Title" type="LineEdit" parent="UI/Charting Tabs/Chart"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 134.0
+offset_right = 110.0
+offset_bottom = 159.0
+theme_override_font_sizes/font_size = 12
+placeholder_text = "Song Title"
+
+[node name="Set Song Title" type="Button" parent="UI/Charting Tabs/Chart/Song Title"]
+layout_mode = 0
+offset_left = 118.0
+offset_right = 157.0
+offset_bottom = 25.0
+focus_mode = 0
+text = "Set
+"
+
+[node name="Song Artist" type="LineEdit" parent="UI/Charting Tabs/Chart"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 174.0
+offset_right = 110.0
+offset_bottom = 199.0
+theme_override_font_sizes/font_size = 12
+placeholder_text = "Song Artist"
+
+[node name="Set Artist" type="Button" parent="UI/Charting Tabs/Chart/Song Artist"]
+layout_mode = 0
+offset_left = 118.0
+offset_right = 157.0
+offset_bottom = 25.0
+focus_mode = 0
+text = "Set
+"
+
+[node name="Difficulty" type="LineEdit" parent="UI/Charting Tabs/Chart"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 214.0
+offset_right = 110.0
+offset_bottom = 239.0
+theme_override_font_sizes/font_size = 12
+placeholder_text = "Difficulty"
+
+[node name="Set Difficulty" type="Button" parent="UI/Charting Tabs/Chart/Difficulty"]
+layout_mode = 0
+offset_left = 118.0
+offset_right = 157.0
+offset_bottom = 25.0
+focus_mode = 0
+text = "Set
+"
+
+[node name="Panel" type="Panel" parent="UI"]
+offset_left = -640.0
+offset_top = 304.0
+offset_right = 640.0
+offset_bottom = 360.0
+
+[node name="ColorRect" type="ColorRect" parent="UI/Panel"]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+metadata/_edit_layout_mode = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/Panel/ColorRect"]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+metadata/_edit_layout_mode = 1
+
+[node name="RestartButton" type="CheckButton" parent="UI/Panel/ColorRect/HBoxContainer"]
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_hover_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_icons/checked = ExtResource("8_2baq7")
+theme_override_icons/unchecked = ExtResource("8_2baq7")
+shortcut_in_tooltip = false
+
+[node name="RewindButton" type="CheckButton" parent="UI/Panel/ColorRect/HBoxContainer"]
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_hover_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_icons/checked = ExtResource("9_1kf1r")
+theme_override_icons/unchecked = ExtResource("9_1kf1r")
+shortcut_in_tooltip = false
+
+[node name="Pause Button" type="CheckButton" parent="UI/Panel/ColorRect/HBoxContainer"]
+layout_mode = 2
+focus_mode = 0
+theme_override_icons/checked = ExtResource("10_akjbx")
+theme_override_icons/unchecked = ExtResource("11_kpowo")
+shortcut_in_tooltip = false
+
+[node name="FastForwardButton" type="CheckButton" parent="UI/Panel/ColorRect/HBoxContainer"]
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_hover_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_icons/checked = ExtResource("12_a7qml")
+theme_override_icons/unchecked = ExtResource("12_a7qml")
+shortcut_in_tooltip = false
+
+[node name="SkipButton" type="CheckButton" parent="UI/Panel/ColorRect/HBoxContainer"]
+layout_mode = 2
+focus_mode = 0
+theme_override_colors/font_hover_color = Color(0.690196, 0.690196, 0.690196, 1)
+theme_override_icons/checked = ExtResource("13_wohrt")
+theme_override_icons/unchecked = ExtResource("13_wohrt")
+shortcut_in_tooltip = false
+
+[node name="ExtraLabel" type="Label" parent="UI/Panel/ColorRect"]
+layout_mode = 0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 184.0
+offset_bottom = 48.0
+
+[node name="Song Progress" type="HSlider" parent="UI/Panel"]
+layout_mode = 0
+offset_top = -16.0
+offset_right = 1280.0
+theme = ExtResource("5_e1v1b")
+step = 0.001
+scrollable = false
+
+[node name="Time Display Progress" type="Label" parent="UI/Panel/Song Progress"]
+layout_mode = 0
+offset_top = -40.0
+offset_right = 128.0
+theme = ExtResource("5_e1v1b")
+text = "0:00"
+vertical_alignment = 1
+metadata/_edit_lock_ = true
+
+[node name="Time Display Finish" type="Label" parent="UI/Panel/Song Progress"]
+layout_mode = 0
+offset_left = 1152.0
+offset_top = -40.0
+offset_right = 1280.0
+theme = ExtResource("5_e1v1b")
+text = "-0:00"
+horizontal_alignment = 2
+vertical_alignment = 1
+metadata/_edit_lock_ = true
+
+[node name="Time Display Drag" type="Label" parent="UI/Panel/Song Progress"]
+modulate = Color(1, 1, 1, 0.588235)
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -64.0
+offset_top = -48.0
+offset_right = 64.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("5_e1v1b")
+text = "0:00"
+horizontal_alignment = 1
+vertical_alignment = 1
+metadata/_edit_lock_ = true
+
+[node name="ParallaxBackground" type="ParallaxBackground" parent="." groups=["layer"]]
+layer = 1
+offset = Vector2(640, 360)
+transform = Transform2D(1, 0, 0, 1, 640, 360)
+scroll_ignore_camera_zoom = true
+
+[node name="ParallaxLayer" type="ParallaxLayer" parent="ParallaxBackground"]
+motion_mirroring = Vector2(0, 512)
+
+[node name="Grid" parent="ParallaxBackground/ParallaxLayer" instance=ExtResource("14_cmano")]
+unique_name_in_owner = true
+modulate = Color(0.678431, 0.588235, 1, 1)
+position = Vector2(0, -296)
+centered = true
+event_column_color = Color(0, 0, 0, 0.254902)
+
+[node name="ColorRect" type="ColorRect" parent="ParallaxBackground/ParallaxLayer/Grid"]
+offset_left = -144.0
+offset_right = 144.0
+offset_bottom = 32.0
+color = Color(0.627451, 0, 0.52549, 0.47451)
+
+[node name="Chart Editor UI" type="CanvasLayer" parent="." groups=["layer"]]
+offset = Vector2(640, 360)
+transform = Transform2D(1, 0, 0, 1, 640, 360)
+follow_viewport_enabled = true
+
+[node name="Song Pos Marker" type="ColorRect" parent="Chart Editor UI"]
+custom_minimum_size = Vector2(0, 4)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -648.0
+offset_top = -664.0
+offset_right = -600.0
+offset_bottom = -660.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+metadata/_edit_lock_ = true
+
+[node name="Background" type="CanvasLayer" parent="." groups=["layer"]]
+layer = 0
+offset = Vector2(640, 360)
+transform = Transform2D(1, 0, 0, 1, 640, 360)
+
+[node name="Background" type="Sprite2D" parent="Background"]
+modulate = Color(0.117647, 0.117647, 0.117647, 1)
+texture = ExtResource("15_7vd83")
+metadata/_edit_lock_ = true
+
+[node name="Sprite2D" type="Sprite2D" parent="Background"]
+modulate = Color(0.117647, 0.117647, 0.117647, 0.360784)
+z_index = 1
+material = SubResource("ShaderMaterial_u3o50")
+position = Vector2(0, 6.10352e-05)
+scale = Vector2(44.5313, 44.5313)
+texture = ExtResource("17_d14d7")
+metadata/_edit_lock_ = true
+
+[connection signal="new_beat" from="Conductor" to="." method="_on_conductor_new_beat"]
+[connection signal="new_step" from="Conductor" to="." method="_on_conductor_new_step"]
+[connection signal="text_changed" from="UI/Brush Settings/Event Brush/Event Name" to="." method="_on_event_name_text_changed"]
+[connection signal="text_changed" from="UI/Brush Settings/Event Brush/Event Parameters" to="." method="_on_event_parameters_text_changed"]
+[connection signal="toggled" from="UI/Charting Tabs/Editor/Beat Sounds Check Box" to="." method="_on_beat_sounds_check_box_toggled"]
+[connection signal="toggled" from="UI/Charting Tabs/Editor/Step Sounds Check Box" to="." method="_on_step_sounds_check_box_toggled"]
+[connection signal="value_changed" from="UI/Charting Tabs/Editor/Vocals Slider" to="." method="_on_vocals_slider_value_changed"]
+[connection signal="value_changed" from="UI/Charting Tabs/Editor/Instrumental Slider" to="." method="_on_instrumental_slider_value_changed"]
+[connection signal="value_changed" from="UI/Charting Tabs/Editor/Speed Slider" to="." method="_on_speed_slider_value_changed"]
+[connection signal="pressed" from="UI/Charting Tabs/Editor/SaveButton" to="." method="_on_save_button_pressed"]
+[connection signal="pressed" from="UI/Charting Tabs/Tempo/Add Tempo" to="." method="_on_add_tempo_pressed"]
+[connection signal="pressed" from="UI/Charting Tabs/Meter/Add Meter" to="." method="_on_add_meter_pressed"]
+[connection signal="pressed" from="UI/Charting Tabs/Chart/Strum Text/Set Strum" to="." method="_on_set_strum_pressed"]
+[connection signal="pressed" from="UI/Charting Tabs/Chart/Scroll Speed/Set Scroll Speed" to="." method="_on_set_scroll_speed_pressed"]
+[connection signal="pressed" from="UI/Charting Tabs/Chart/Offset/Offset Button" to="." method="_on_offset_button_pressed"]
+[connection signal="pressed" from="UI/Charting Tabs/Chart/Song Title/Set Song Title" to="." method="_on_set_song_title_pressed"]
+[connection signal="pressed" from="UI/Charting Tabs/Chart/Song Artist/Set Artist" to="." method="_on_set_artist_pressed"]
+[connection signal="pressed" from="UI/Charting Tabs/Chart/Difficulty/Set Difficulty" to="." method="_on_set_difficulty_pressed"]
+[connection signal="pressed" from="UI/Panel/ColorRect/HBoxContainer/RestartButton" to="." method="_on_restart_button_pressed"]
+[connection signal="pressed" from="UI/Panel/ColorRect/HBoxContainer/RewindButton" to="." method="_on_rewind_button_pressed"]
+[connection signal="toggled" from="UI/Panel/ColorRect/HBoxContainer/Pause Button" to="." method="_on_pause_button_toggled"]
+[connection signal="pressed" from="UI/Panel/ColorRect/HBoxContainer/FastForwardButton" to="." method="_on_fast_forward_button_pressed"]
+[connection signal="pressed" from="UI/Panel/ColorRect/HBoxContainer/SkipButton" to="." method="_on_skip_button_pressed"]
+[connection signal="drag_ended" from="UI/Panel/Song Progress" to="." method="_on_song_progress_drag_ended"]
+[connection signal="drag_started" from="UI/Panel/Song Progress" to="." method="_on_song_progress_drag_started"]

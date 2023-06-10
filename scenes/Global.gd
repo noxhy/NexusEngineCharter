@@ -25,6 +25,6 @@ func _process(delta):
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 	
 	
-	$CanvasLayer/Performance.text = "NE CE v1.0"
+	$CanvasLayer/Performance.text = "NE CE v1.1"
 	$CanvasLayer/Performance.text += "\nFPS: " + str(Engine.get_frames_per_second())
 	$CanvasLayer/Performance.text += "\nMEM: " + str( snapped( OS.get_static_memory_usage() / 1024.0 / 1024.0, 0.1 ) ) + " MB"

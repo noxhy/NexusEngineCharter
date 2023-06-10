@@ -12,7 +12,7 @@ const event_preload = preload("res://scenes/instances/event.tscn")
 @onready var beat_sounds = true
 @onready var step_sounds = false
 
-@export var strum_count = 4
+@export var strum_count = 8
 @export var highlight_color = Color(1, 1, 1, 0.5)
 
 var playback_speed = 1.0
@@ -41,10 +41,8 @@ var dragging_time = false
 
 var layers = []
 var selected_note = []
+var events_list: Array = []
 var pressing_ctrl = false
-
-var brush_note_length = 0.0
-var brush_note_type: int = 0
 
 var brush_event_name = ""
 var brush_event_parameters = ""
@@ -114,8 +112,6 @@ func _process(delta):
 	$Music/Vocals.pitch_scale = playback_speed
 	$Music/Instrumental.pitch_scale = playback_speed
 	
-	$"UI/Brush Settings/Note Brush/Note Length Label/Note Length".custom_arrow_step = 1.0 / chart_snap
-	
 	if $Music/Instrumental.playing:
 		
 		var song_position = $Music/Instrumental.get_playback_position()
@@ -131,7 +127,6 @@ func _process(delta):
 		
 		if old_tempo != tempo_at:
 			old_tempo = tempo_at
-			render_notes()
 		
 		var meter_at = get_meter_at( song_position )
 		$Conductor.beats_per_measure = meter_at[0]
@@ -153,7 +148,7 @@ func _process(delta):
 	queue_redraw()
 	
 	$UI/Panel/ColorRect/ExtraLabel.text = "Chart Zoom: " + str(chart_zoom)
-	$UI/Panel/ColorRect/ExtraLabel.text += "\n" + "Notes Drawn: " + str(note_instances.size()) + "/" + str( chart.get_note_data().size() )
+	$UI/Panel/ColorRect/ExtraLabel.text += "\n" + "Events List: " + str( events_list )
 	$UI/Panel/ColorRect/ExtraLabel.text += " • " + "Events Drawn: " + str(event_instances.size()) + "/" + str( chart.get_events_data().size() )
 	
 	if Input.is_action_just_pressed("toggle_song"):
@@ -164,7 +159,6 @@ func _process(delta):
 	
 	if Input.is_action_just_released("ui_cancel"):
 		
-		render_notes()
 		render_events()
 	
 	if Input.is_action_just_released("debug"):
@@ -174,7 +168,7 @@ func _process(delta):
 	
 	if Input.is_action_just_pressed("mouse_left"):
 		
-		var lane = grid_position_to_time( get_global_mouse_position() ).x
+		var lane = grid_position_to_time( get_global_mouse_position() ).x + ( strum_count / 2 ) - 1
 		var time = grid_position_to_time( get_global_mouse_position() ).y
 		
 		time = format_time(time)
@@ -185,48 +179,20 @@ func _process(delta):
 			
 			if get_global_mouse_position().y >= 64 + camera_offset && get_global_mouse_position().y <= 640 + camera_offset:
 				
-				if is_slot_filled(time, lane):
+				if is_slot_filled_event(time, lane):
 					
 					if pressing_ctrl:
 						
-						for i in selected_note:
-							
-							chart.chart_data.notes.remove_at( i )
-							
-							for j in selected_note:
-								
-								if j > i:
-									selected_note[ selected_note.find(j) ] = j - 1
+						if find_event( time, events_list.find( brush_event_name ) ) == -1:
+							chart.chart_data.events.append( [time, brush_event_name, brush_event_parameters.split("\n")] )
 					else:
 						
-						chart.chart_data.notes.remove_at( find_note(time, lane) )
-					
-					selected_note = []
+						if find_event( time, lane ) != -1:
+							chart.chart_data.events.remove_at( find_event( time, lane ) )
 				else:
 					
-					chart.chart_data.notes.append( [time, lane, brush_note_length, brush_note_type] )
-					
-					if pressing_ctrl: selected_note.append( find_note(time, lane) )
-					else: selected_note = [ find_note(time, lane) ]
-				
-				render_notes()
-		elif lane == -1:
-			
-			var camera_offset = $Camera2D.position.y - 360
-			
-			if get_global_mouse_position().y >= 64 + camera_offset && get_global_mouse_position().y <= 640 + camera_offset:
-				
-				if is_slot_filled_event(time):
-					
-					if pressing_ctrl:
-						
+					if find_event( time, events_list.find( brush_event_name ) ) == -1:
 						chart.chart_data.events.append( [time, brush_event_name, brush_event_parameters.split("\n")] )
-					else:
-						
-						chart.chart_data.events.remove_at( find_event( time ) )
-				else:
-					
-					chart.chart_data.events.append( [time, brush_event_name, brush_event_parameters.split("\n")] )
 				
 				render_events()
 	
@@ -246,9 +212,8 @@ func _process(delta):
 				
 				if is_slot_filled(time, lane):
 					
-					selected_note.append( find_note(time, lane) )
+					selected_note.appenprd( find_note(time, lane) )
 				
-				render_notes()
 	
 	if Input.is_action_just_released("scroll_up"):
 		
@@ -270,7 +235,6 @@ func _process(delta):
 				$Music/Instrumental.stream_paused = true
 				
 				chart_render( delta )
-				render_notes( song_position )
 				render_events( song_position )
 	
 	if Input.is_action_just_released("scroll_down"):
@@ -293,7 +257,6 @@ func _process(delta):
 				$Music/Instrumental.stream_paused = true
 				
 				chart_render( delta )
-				render_notes( song_position )
 				render_events( song_position )
 
 
@@ -311,7 +274,6 @@ func _on_conductor_new_beat(_current_beat, measure_relative):
 		
 		tween.tween_property($Background/Background, "scale", Vector2(1.05, 1.05), 0.0125)
 		
-		render_notes()
 		render_events()
 		
 	else:
@@ -350,7 +312,6 @@ func _on_song_progress_drag_ended(_value_changed):
 	$"UI/Panel/ColorRect/HBoxContainer/Pause Button".button_pressed = false
 	dragging_time = false
 	
-	render_notes()
 	render_events()
 
 
@@ -381,7 +342,6 @@ func read_audio_file(path: String):
 
 
 func _on_speed_slider_value_changed(value): playback_speed = value
-func _on_hit_sound_volume_value_changed(value): $"Hit Sound".volume_db = value
 
 func _on_rewind_button_pressed():
 	
@@ -392,7 +352,6 @@ func _on_rewind_button_pressed():
 	$Music/Instrumental.seek(instrumental_seek)
 	passed_note_instances = []
 	
-	render_notes()
 	render_events()
 
 
@@ -405,7 +364,6 @@ func _on_fast_forward_button_pressed():
 	$Music/Instrumental.seek(instrumental_seek)
 	passed_note_instances = []
 	
-	render_notes()
 	render_events()
 
 
@@ -415,7 +373,6 @@ func _on_restart_button_pressed():
 	$Music/Instrumental.seek(0)
 	passed_note_instances = []
 	
-	render_notes()
 	render_events()
 
 
@@ -425,7 +382,6 @@ func _on_skip_button_pressed():
 	$Music/Instrumental.seek(instrumental_length - 0.1)
 	passed_note_instances = []
 	
-	render_notes()
 	render_events()
 
 
@@ -555,11 +511,13 @@ func snap_to_grid(pos: Vector2, grid: Vector2 = Vector2(8, 8), offset: Vector2 =
 	
 	return pos
 
+
 func _draw():
 	
 	var grid_scale = ( 16.0 / ( get_meter_at( $Music/Instrumental.get_playback_position() )[1] ) )
 	var scaler = chart_grid * chart_zoom * Vector2( grid_scale, grid_scale * ( 4.0 / chart_snap ) )
-	var offset = Vector2( scaler.x / ( 1 + ( ( strum_count + 1 ) % 2 ) ), -scaler.y / chart_zoom.y )
+	# var offset = Vector2( scaler.x / ( 1 + ( ( strum_count + 1 ) % 2 ) ), -scaler.y / chart_zoom.y )
+	var offset = Vector2(0, 0)
 	
 	draw_rect( Rect2( snap_to_grid(get_global_mouse_position(), scaler, offset ) * scaler - offset, scaler ), highlight_color )
 
@@ -583,7 +541,7 @@ func get_grid_position( pos: Vector2, offset: Vector2 = Vector2(0, 0) ) -> Vecto
 
 func chart_render(_delta: float):
 	
-	%Grid.columns = strum_count + 1
+	%Grid.columns = strum_count
 	
 	var song_position = $Music/Instrumental.get_playback_position()
 	
@@ -722,12 +680,10 @@ func _on_offset_button_pressed():
 	chart.offset = $"UI/Charting Tabs/Chart/Offset".text.to_float()
 	offset = chart.offset
 	$Conductor.offset = chart.offset
-	render_notes()
 	render_events()
 
 func _on_set_strum_pressed(): 
 	strum_count = $"UI/Charting Tabs/Chart/Strum Text".text.to_int()
-	render_notes()
 	render_events()
 
 
@@ -814,7 +770,7 @@ func render_events( song_time = $Music/Instrumental.get_playback_position() ):
 		event_instances[0].queue_free()
 		event_instances.remove_at(0)
 	
-	var events_list = []
+	events_list = []
 	
 	
 	for i in chart.get_events_data():
@@ -838,7 +794,7 @@ func render_events( song_time = $Music/Instrumental.get_playback_position() ):
 			
 			var event_instance = event_preload.instantiate()
 			
-			var arrow_x = ( ( strum_count * scaler.x ) * -0.5 ) + ( lane * ( scaler.x ) )
+			var arrow_x = ( ( strum_count * scaler.x ) * -0.5 + ( scaler.x / 2) ) + ( lane * ( scaler.x ) )
 			var arrow_y = -296 + ( chart_grid.y * grid_scale / 2 ) + ( ( scaler.y * meter_multi ) * ( ( time + offset ) / seconds_per_beat ) )
 			
 			event_instance.position = Vector2(arrow_x, arrow_y)
@@ -847,11 +803,15 @@ func render_events( song_time = $Music/Instrumental.get_playback_position() ):
 			if !events_list.has(event_name):
 				events_list.append(event_name)
 			
+			lane = events_list.find(event_name)
+			arrow_x = ( ( strum_count * scaler.x ) * -0.5 + ( scaler.x / 2) ) + ( lane * ( scaler.x ) )
+			event_instance.position = Vector2(arrow_x, arrow_y)
+			
 			event_instance.color.h = 1 - 0.1 * events_list.find(event_name)
 			event_instance.zoom = chart_zoom
 			event_instance.event_name = event_name
 			event_instance.parameters = parameters
-			event_instance.offset.x = ( -256 * events_list.find(event_name) / 2 )
+			event_instance.offset.x = ( -256 * ( events_list.find(event_name) ) )
 			
 			event_instances.append( event_instance )
 			$"Chart Editor UI".add_child( event_instance )
@@ -873,18 +833,22 @@ func is_slot_filled(time: float, lane: int) -> bool:
 	
 	return output
 
-func is_slot_filled_event(time: float) -> bool:
+func is_slot_filled_event(time: float, lane: int) -> bool:
 	
 	var output = false
+	var index = 0
 	
 	for i in chart.get_events_data():
 		
 		if ( !is_equal_approx(i[0], time ) ):
 			continue
 		elif ( is_equal_approx(i[0], time ) ):
-			output = true
 			i[0] = time
-			break
+			
+			if lane == events_list.find( i[1] ):
+				
+				output = true
+				break
 		
 	
 	return output
@@ -900,7 +864,8 @@ func grid_position_to_time(pos: Vector2) -> Vector2:
 	
 	var snap_scale = ( 16.0 / ( get_meter_at( $Music/Instrumental.get_playback_position() )[0] * chart_snap ) )
 	
-	var lane = get_grid_position( pos, Vector2( scaler.x / ( 1 + ( ( strum_count + 1 ) % 2 ) ) , 0) ).x
+	# var lane = get_grid_position( pos, Vector2( scaler.x / ( 1 + ( ( strum_count + 1 ) % 2 ) ) , 0) ).x
+	var lane = get_grid_position( pos, Vector2( 0 , 0) ).x
 	var note = get_grid_position( pos ).y * ( chart_snap / 4.0 )
 	
 	var time = ( ( ( scaler.y * meter_multi ) / chart_snap ) * note ) / scaler.y * ( seconds_per_beat / chart_snap ) - offset
@@ -926,7 +891,7 @@ func find_note(time: float, lane: int) -> int:
 	
 	return output
 
-func find_event(time: float) -> int:
+func find_event(time: float, lane: int) -> int:
 	
 	var output = -1
 	var index = 0
@@ -934,12 +899,20 @@ func find_event(time: float) -> int:
 	for i in chart.get_events_data():
 		
 		if ( !is_equal_approx(i[0], time) ):
+			
 			index += 1
 			continue
 		elif ( is_equal_approx(i[0], time) ):
-			output = index
+			
 			i[0] = time
-			break
+			
+			if ( lane == events_list.find( i[1] ) ):
+				
+				output = index
+				break
+			else:
+				
+				index += 1
 		
 	
 	return output
@@ -981,14 +954,6 @@ func find_last_event(time: float) -> int:
 	
 	return output
 
-
-func _on_note_length_value_changed(value):
-	
-	brush_note_length = value
-
-func _on_note_type_value_changed(value):
-	
-	brush_note_type = value
 
 func _on_event_name_text_changed(new_text):
 	

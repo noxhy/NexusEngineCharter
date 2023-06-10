@@ -30,9 +30,18 @@ func _on_popup_menu_id_pressed(id):
 	elif id == 2:
 		
 		get_tree().change_scene_to_file("res://scenes/convert_chart.tscn")
+	elif id == 3:
+		
+		$"UI/Open Chart File Event Editor".visible = true
 
 
 func _on_open_chart_file_file_selected(path):
 	
 	Global.file = path
 	get_tree().change_scene_to_file("res://scenes/chart_editor.tscn")
+
+
+func _on_open_chart_file_event_editor_file_selected(path):
+	
+	Global.file = path
+	get_tree().change_scene_to_file("res://scenes/event_editor.tscn")

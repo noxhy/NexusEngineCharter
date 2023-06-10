@@ -23,8 +23,8 @@ Global="*res://scenes/global.tscn"
 
 window/size/viewport_width=1280
 window/size/viewport_height=720
-window/per_pixel_transparency/allowed=true
 window/stretch/mode="canvas_items"
+window/per_pixel_transparency/allowed=true
 
 [input]
 

@@ -69,8 +69,16 @@ func _process(delta):
 		if length != 0:
 			$Line2D.visible = true
 			$"Line2D/Tail End".offset.y = $"Line2D/Tail End".texture.get_width() * -0.5
-			line_length += $"Line2D/Tail End".offset.y * $Arrow.scale.y
-			line_length -= grid_size.y / 2
+			
+			if length <= 0.25:
+				
+				line_length += $"Line2D/Tail End".offset.y * $Arrow.scale.y
+			else:
+				
+				line_length += $"Line2D/Tail End".offset.y * $Arrow.scale.y * 2
+				line_length -= 1 / ( line_length )
+			
+			
 			$"Line2D/Tail End".position.y = line_length
 			
 			$VisibleOnScreenNotifier2D.rect.size = grid_size + Vector2(0, grid_size.y * line_length)

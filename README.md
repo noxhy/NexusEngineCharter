@@ -1,7 +1,7 @@
 # Before Submitting an issue, be sure that it's not a Godot 4 issue.
 
 # Nexus Engine 2 Chart Editor
-Chart Editor for Nexus Engine 2 made in Godot 4 (As of now RC 5).
+Chart Editor for Nexus Engine 2 made in Godot 4.
 This is version 2 of the engine with a complete overhaul of the code.
 
 The main engine's source code can be seen here: https://github.com/noxhy/NexusEngine

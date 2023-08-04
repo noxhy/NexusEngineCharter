@@ -370,8 +370,7 @@ func read_audio_file(path: String):
 	
 	print("File type: ", path.get_extension())
 	
-	if (path.get_extension() == "mp3"):
-		
+	if ( path.get_extension() == "mp3" ):
 		
 		content = AudioStreamMP3.new()
 		content.data = file.get_buffer(file.get_length())

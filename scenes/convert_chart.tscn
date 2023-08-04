@@ -6,6 +6,7 @@
 [ext_resource type="FontFile" uid="uid://n7emp3kshbao" path="res://fonts/Bold Normal Text.ttf" id="4_y63wu"]
 
 [node name="Chart Converter" type="Node2D"]
+visible = false
 script = ExtResource("1_7wcw1")
 
 [node name="Music" type="Node" parent="."]
@@ -79,13 +80,13 @@ access = 2
 root_subfolder = "res://"
 filters = PackedStringArray("*.json")
 
-[node name="mp3 only Disclaimer" type="Label" parent="UI"]
+[node name="Audio Format Disclaimer" type="Label" parent="UI"]
 offset_left = 32.0
 offset_top = 160.0
 offset_right = 544.0
 offset_bottom = 200.0
 theme = ExtResource("1_5etne")
-text = "Disclaimer: As of now, you can only import .mp3 s during runtime."
+text = "Support file types: .mp3"
 metadata/_edit_lock_ = true
 
 [node name="Vocals Container" type="PanelContainer" parent="UI"]
@@ -337,7 +338,6 @@ metadata/_edit_lock_ = true
 layout_mode = 2
 theme = ExtResource("1_5etne")
 text = "Save Chart"
-metadata/_edit_lock_ = true
 
 [node name="FileDialog" type="FileDialog" parent="UI/Chart File Container/VBoxContainer/HFlowContainer"]
 title = "Open a Directory"

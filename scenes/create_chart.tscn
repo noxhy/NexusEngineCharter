@@ -25,13 +25,13 @@ metadata/_edit_lock_ = true
 
 [node name="UI" type="CanvasLayer" parent="."]
 
-[node name="mp3 only Disclaimer" type="Label" parent="UI"]
+[node name="Audio Format Disclaimer" type="Label" parent="UI"]
 offset_left = 32.0
 offset_top = 160.0
 offset_right = 544.0
-offset_bottom = 192.0
+offset_bottom = 200.0
 theme = ExtResource("2_a5udf")
-text = "Disclaimer: As of now, you can only import .mp3 s during runtime."
+text = "Support file types: .mp3"
 metadata/_edit_lock_ = true
 
 [node name="Vocals Container" type="PanelContainer" parent="UI"]

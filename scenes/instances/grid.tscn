@@ -6,7 +6,6 @@
 [node name="Grid" type="Node2D"]
 script = ExtResource("1_8rugm")
 grid_size = Vector2(32, 32)
-columns = 8
 centered = false
 
 [node name="TextureRect" type="TextureRect" parent="."]

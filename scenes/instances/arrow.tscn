@@ -36,9 +36,9 @@ centered = false
 offset = Vector2(0, -300)
 
 [node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
-position = Vector2(-23.7461, -23.8779)
-scale = Vector2(1.08789, 1.09033)
-rect = Rect2(-10, -10, 64, 64)
+position = Vector2(-35, -35)
+scale = Vector2(1.092, 1.094)
+rect = Rect2(0, 0, 64, 64)
 
 [connection signal="screen_entered" from="VisibleOnScreenNotifier2D" to="." method="_on_visible_on_screen_notifier_2d_screen_entered"]
 [connection signal="screen_exited" from="VisibleOnScreenNotifier2D" to="." method="_on_visible_on_screen_notifier_2d_screen_exited"]

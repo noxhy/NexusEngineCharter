@@ -29,8 +29,7 @@ editor_description = "The Nexus Engine Chart Editor"
 z_index = 2000
 z_as_relative = false
 script = ExtResource("1_dhekv")
-strum_count = 8
-highlight_color = Color(0.266667, 0.254902, 0.803922, 0.337255)
+highlight_color = Color(1, 1, 1, 0.431373)
 metadata/_edit_horizontal_guides_ = []
 
 [node name="Hit Sound" type="AudioStreamPlayer" parent="."]
@@ -39,6 +38,7 @@ stream = ExtResource("3_xnxox")
 bus = &"SFX"
 
 [node name="Music" type="Node" parent="."]
+unique_name_in_owner = true
 
 [node name="Vocals" type="AudioStreamPlayer" parent="Music"]
 bus = &"Music"
@@ -67,7 +67,6 @@ bus = &"SFX"
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(640, 360)
-ignore_rotation = false
 limit_smoothed = true
 drag_top_margin = 0.5
 metadata/_edit_lock_ = true
@@ -106,29 +105,12 @@ theme_override_constants/outline_size = 8
 text = "Details
 "
 
-[node name="Conductor" type="TabBar" parent="UI/Conductor Stats"]
-visible = false
-layout_mode = 2
-
-[node name="Conductor Stats" type="Label" parent="UI/Conductor Stats/Conductor"]
-layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme = ExtResource("5_qommj")
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 8
-text = "Details
-"
-metadata/_edit_layout_mode = 1
-
 [node name="Brush Settings" type="TabContainer" parent="UI"]
 anchors_preset = -1
 anchor_left = -0.5
 anchor_top = -0.331944
 anchor_right = -0.35
-anchor_bottom = -0.122222
+anchor_bottom = -0.226389
 offset_top = 192.0
 offset_bottom = 192.0
 grow_horizontal = 2
@@ -142,39 +124,15 @@ metadata/_edit_use_anchors_ = true
 [node name="Note Brush" type="TabBar" parent="UI/Brush Settings"]
 layout_mode = 2
 
-[node name="Note Length Label" type="Label" parent="UI/Brush Settings/Note Brush"]
-layout_mode = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 2.0
-offset_top = 13.0
-offset_right = -84.0
-offset_bottom = -72.0
-grow_horizontal = 2
-grow_vertical = 2
-theme = ExtResource("5_qommj")
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 8
-text = "Note Length:"
-
-[node name="Note Length" type="SpinBox" parent="UI/Brush Settings/Note Brush/Note Length Label"]
-layout_mode = 0
-offset_left = 106.0
-offset_top = 8.0
-offset_right = 183.125
-offset_bottom = 33.0
-focus_mode = 1
-max_value = 8.0
-step = 0.05
-
 [node name="Note Type" type="Label" parent="UI/Brush Settings/Note Brush"]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 2.0
-offset_top = 69.0
+offset_top = 5.0
 offset_right = -84.0
-offset_bottom = -16.0
+offset_bottom = -3.0
 grow_horizontal = 2
 grow_vertical = 2
 focus_mode = 1
@@ -191,32 +149,6 @@ offset_right = 183.125
 offset_bottom = 33.0
 max_value = 9.0
 
-[node name="Event Brush" type="TabBar" parent="UI/Brush Settings"]
-visible = false
-layout_mode = 2
-
-[node name="Event Name" type="LineEdit" parent="UI/Brush Settings/Event Brush"]
-layout_mode = 0
-offset_left = 8.0
-offset_top = 5.0
-offset_right = 184.0
-offset_bottom = 30.0
-focus_mode = 1
-placeholder_text = "Event Name"
-context_menu_enabled = false
-virtual_keyboard_enabled = false
-
-[node name="Event Parameters" type="TextEdit" parent="UI/Brush Settings/Event Brush"]
-layout_mode = 0
-offset_left = 8.0
-offset_top = 37.0
-offset_right = 184.0
-offset_bottom = 117.0
-focus_mode = 1
-placeholder_text = "Event Parameters
-Separated by Newline"
-context_menu_enabled = false
-
 [node name="Charting Tabs" type="TabContainer" parent="UI"]
 offset_left = 386.0
 offset_top = -232.0
@@ -231,33 +163,12 @@ script = ExtResource("6_rtq10")
 layout_mode = 2
 theme_override_fonts/font = ExtResource("5_ql4v3")
 
-[node name="Beat Sounds Check Box" type="CheckBox" parent="UI/Charting Tabs/Editor"]
-layout_mode = 0
-offset_left = 8.0
-offset_top = 14.0
-offset_right = 118.0
-offset_bottom = 38.0
-focus_mode = 0
-theme_override_font_sizes/font_size = 12
-button_pressed = true
-text = "Beat Sounds"
-
-[node name="Step Sounds Check Box" type="CheckBox" parent="UI/Charting Tabs/Editor"]
-layout_mode = 0
-offset_left = 126.0
-offset_top = 14.0
-offset_right = 236.0
-offset_bottom = 38.0
-focus_mode = 0
-theme_override_font_sizes/font_size = 12
-text = "Step Sounds"
-
 [node name="Vocals Slider" type="HSlider" parent="UI/Charting Tabs/Editor"]
 layout_mode = 0
 offset_left = 8.0
-offset_top = 55.0
-offset_right = 118.0
-offset_bottom = 87.0
+offset_top = 14.0
+offset_right = 236.0
+offset_bottom = 46.0
 min_value = -80.0
 max_value = 0.0
 
@@ -273,10 +184,10 @@ metadata/_edit_lock_ = true
 
 [node name="Instrumental Slider" type="HSlider" parent="UI/Charting Tabs/Editor"]
 layout_mode = 0
-offset_left = 126.0
-offset_top = 55.0
+offset_left = 8.0
+offset_top = 54.0
 offset_right = 236.0
-offset_bottom = 87.0
+offset_bottom = 86.0
 min_value = -80.0
 max_value = 0.0
 
@@ -334,293 +245,11 @@ metadata/_edit_lock_ = true
 layout_mode = 0
 offset_left = 8.0
 offset_top = 174.0
-offset_right = 113.0
+offset_right = 246.0
 offset_bottom = 198.0
 focus_mode = 0
 theme_override_font_sizes/font_size = 12
 text = "Save Chart"
-
-[node name="Tempo" type="TabBar" parent="UI/Charting Tabs"]
-visible = false
-layout_mode = 2
-
-[node name="Time Edit" type="LineEdit" parent="UI/Charting Tabs/Tempo"]
-layout_mode = 0
-offset_left = 8.0
-offset_top = 14.0
-offset_right = 126.0
-offset_bottom = 38.0
-theme_override_font_sizes/font_size = 12
-placeholder_text = "Time (seconds)"
-
-[node name="Tempo Edit" type="LineEdit" parent="UI/Charting Tabs/Tempo"]
-layout_mode = 0
-offset_left = 8.0
-offset_top = 54.0
-offset_right = 126.0
-offset_bottom = 78.0
-theme_override_font_sizes/font_size = 12
-placeholder_text = "Tempo"
-
-[node name="Add Tempo" type="Button" parent="UI/Charting Tabs/Tempo"]
-layout_mode = 0
-offset_left = 166.0
-offset_top = 30.0
-offset_right = 211.0
-offset_bottom = 55.0
-focus_mode = 0
-text = "Add"
-
-[node name="ColorRect" type="ColorRect" parent="UI/Charting Tabs/Tempo/Add Tempo"]
-layout_mode = 0
-offset_left = -32.0
-offset_top = -8.0
-offset_right = -12.0
-offset_bottom = -4.0
-metadata/_edit_lock_ = true
-
-[node name="ColorRect2" type="ColorRect" parent="UI/Charting Tabs/Tempo/Add Tempo"]
-layout_mode = 0
-offset_left = -32.0
-offset_top = 32.0
-offset_right = -12.0
-offset_bottom = 36.0
-metadata/_edit_lock_ = true
-
-[node name="ColorRect3" type="ColorRect" parent="UI/Charting Tabs/Tempo/Add Tempo"]
-layout_mode = 0
-offset_left = -12.0
-offset_top = -8.0
-offset_right = -8.0
-offset_bottom = 36.0
-metadata/_edit_lock_ = true
-
-[node name="Time Label" type="Label" parent="UI/Charting Tabs/Tempo"]
-layout_mode = 0
-offset_left = -2.0
-offset_top = 102.0
-offset_right = 62.0
-offset_bottom = 142.0
-text = "Time"
-metadata/_edit_lock_ = true
-
-[node name="Tempo Label" type="Label" parent="UI/Charting Tabs/Tempo"]
-layout_mode = 0
-offset_left = 94.0
-offset_top = 102.0
-offset_right = 158.0
-offset_bottom = 142.0
-text = "Tempo
-"
-metadata/_edit_lock_ = true
-
-[node name="ScrollContainer" type="ScrollContainer" parent="UI/Charting Tabs/Tempo"]
-layout_mode = 0
-offset_left = -2.0
-offset_top = 142.0
-offset_right = 254.0
-offset_bottom = 294.0
-horizontal_scroll_mode = 3
-
-[node name="VBoxContainer" type="VBoxContainer" parent="UI/Charting Tabs/Tempo/ScrollContainer"]
-show_behind_parent = true
-layout_mode = 2
-
-[node name="Meter" type="TabBar" parent="UI/Charting Tabs"]
-visible = false
-layout_mode = 2
-
-[node name="Time Edit" type="LineEdit" parent="UI/Charting Tabs/Meter"]
-layout_mode = 0
-offset_left = 8.0
-offset_top = 14.0
-offset_right = 126.0
-offset_bottom = 38.0
-theme_override_font_sizes/font_size = 12
-placeholder_text = "Time (seconds)"
-
-[node name="Beat Edit" type="LineEdit" parent="UI/Charting Tabs/Meter"]
-layout_mode = 0
-offset_left = 8.0
-offset_top = 54.0
-offset_right = 126.0
-offset_bottom = 78.0
-theme_override_font_sizes/font_size = 12
-placeholder_text = "Meter (B/S)"
-
-[node name="Add Meter" type="Button" parent="UI/Charting Tabs/Meter"]
-layout_mode = 0
-offset_left = 166.0
-offset_top = 30.0
-offset_right = 211.0
-offset_bottom = 55.0
-focus_mode = 0
-text = "Add"
-
-[node name="ColorRect" type="ColorRect" parent="UI/Charting Tabs/Meter/Add Meter"]
-layout_mode = 0
-offset_left = -32.0
-offset_top = -8.0
-offset_right = -12.0
-offset_bottom = -4.0
-metadata/_edit_lock_ = true
-
-[node name="ColorRect2" type="ColorRect" parent="UI/Charting Tabs/Meter/Add Meter"]
-layout_mode = 0
-offset_left = -32.0
-offset_top = 32.0
-offset_right = -12.0
-offset_bottom = 36.0
-metadata/_edit_lock_ = true
-
-[node name="ColorRect3" type="ColorRect" parent="UI/Charting Tabs/Meter/Add Meter"]
-layout_mode = 0
-offset_left = -12.0
-offset_top = -8.0
-offset_right = -8.0
-offset_bottom = 36.0
-metadata/_edit_lock_ = true
-
-[node name="Time Label" type="Label" parent="UI/Charting Tabs/Meter"]
-layout_mode = 0
-offset_left = -2.0
-offset_top = 102.0
-offset_right = 62.0
-offset_bottom = 142.0
-text = "Time"
-
-[node name="Meter Label" type="Label" parent="UI/Charting Tabs/Meter"]
-layout_mode = 0
-offset_left = 94.0
-offset_top = 102.0
-offset_right = 158.0
-offset_bottom = 142.0
-text = "Meter
-"
-
-[node name="ScrollContainer" type="ScrollContainer" parent="UI/Charting Tabs/Meter"]
-layout_mode = 0
-offset_left = -2.0
-offset_top = 142.0
-offset_right = 254.0
-offset_bottom = 294.0
-horizontal_scroll_mode = 3
-
-[node name="VBoxContainer" type="VBoxContainer" parent="UI/Charting Tabs/Meter/ScrollContainer"]
-show_behind_parent = true
-layout_mode = 2
-
-[node name="Chart" type="TabBar" parent="UI/Charting Tabs"]
-visible = false
-layout_mode = 2
-
-[node name="Strum Text" type="LineEdit" parent="UI/Charting Tabs/Chart"]
-layout_mode = 0
-offset_left = 8.0
-offset_top = 14.0
-offset_right = 110.0
-offset_bottom = 39.0
-theme_override_font_sizes/font_size = 12
-placeholder_text = "Strum Count"
-
-[node name="Set Strum" type="Button" parent="UI/Charting Tabs/Chart/Strum Text"]
-layout_mode = 0
-offset_left = 118.0
-offset_right = 157.0
-offset_bottom = 25.0
-focus_mode = 0
-text = "Set
-"
-
-[node name="Scroll Speed" type="LineEdit" parent="UI/Charting Tabs/Chart"]
-layout_mode = 0
-offset_left = 8.0
-offset_top = 54.0
-offset_right = 110.0
-offset_bottom = 79.0
-theme_override_font_sizes/font_size = 12
-placeholder_text = "Scroll Speed"
-
-[node name="Set Scroll Speed" type="Button" parent="UI/Charting Tabs/Chart/Scroll Speed"]
-layout_mode = 0
-offset_left = 118.0
-offset_right = 157.0
-offset_bottom = 25.0
-focus_mode = 0
-text = "Set
-"
-
-[node name="Offset" type="LineEdit" parent="UI/Charting Tabs/Chart"]
-layout_mode = 0
-offset_left = 8.0
-offset_top = 94.0
-offset_right = 110.0
-offset_bottom = 119.0
-theme_override_font_sizes/font_size = 12
-placeholder_text = "Offset"
-
-[node name="Offset Button" type="Button" parent="UI/Charting Tabs/Chart/Offset"]
-layout_mode = 0
-offset_left = 118.0
-offset_right = 157.0
-offset_bottom = 25.0
-focus_mode = 0
-text = "Set
-"
-
-[node name="Song Title" type="LineEdit" parent="UI/Charting Tabs/Chart"]
-layout_mode = 0
-offset_left = 8.0
-offset_top = 134.0
-offset_right = 110.0
-offset_bottom = 159.0
-theme_override_font_sizes/font_size = 12
-placeholder_text = "Song Title"
-
-[node name="Set Song Title" type="Button" parent="UI/Charting Tabs/Chart/Song Title"]
-layout_mode = 0
-offset_left = 118.0
-offset_right = 157.0
-offset_bottom = 25.0
-focus_mode = 0
-text = "Set
-"
-
-[node name="Song Artist" type="LineEdit" parent="UI/Charting Tabs/Chart"]
-layout_mode = 0
-offset_left = 8.0
-offset_top = 174.0
-offset_right = 110.0
-offset_bottom = 199.0
-theme_override_font_sizes/font_size = 12
-placeholder_text = "Song Artist"
-
-[node name="Set Artist" type="Button" parent="UI/Charting Tabs/Chart/Song Artist"]
-layout_mode = 0
-offset_left = 118.0
-offset_right = 157.0
-offset_bottom = 25.0
-focus_mode = 0
-text = "Set
-"
-
-[node name="Difficulty" type="LineEdit" parent="UI/Charting Tabs/Chart"]
-layout_mode = 0
-offset_left = 8.0
-offset_top = 214.0
-offset_right = 110.0
-offset_bottom = 239.0
-theme_override_font_sizes/font_size = 12
-placeholder_text = "Difficulty"
-
-[node name="Set Difficulty" type="Button" parent="UI/Charting Tabs/Chart/Difficulty"]
-layout_mode = 0
-offset_left = 118.0
-offset_right = 157.0
-offset_bottom = 25.0
-focus_mode = 0
-text = "Set
-"
 
 [node name="Panel" type="Panel" parent="UI"]
 offset_left = -640.0
@@ -629,9 +258,11 @@ offset_right = 640.0
 offset_bottom = 360.0
 
 [node name="ColorRect" type="ColorRect" parent="UI/Panel"]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = 16.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 1)
@@ -647,6 +278,7 @@ alignment = 1
 metadata/_edit_layout_mode = 1
 
 [node name="RestartButton" type="CheckButton" parent="UI/Panel/ColorRect/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 focus_mode = 0
 theme_override_colors/font_hover_color = Color(0.690196, 0.690196, 0.690196, 1)
@@ -655,6 +287,7 @@ theme_override_icons/unchecked = ExtResource("8_mbigi")
 shortcut_in_tooltip = false
 
 [node name="RewindButton" type="CheckButton" parent="UI/Panel/ColorRect/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 focus_mode = 0
 theme_override_colors/font_hover_color = Color(0.690196, 0.690196, 0.690196, 1)
@@ -663,6 +296,7 @@ theme_override_icons/unchecked = ExtResource("9_sgqha")
 shortcut_in_tooltip = false
 
 [node name="Pause Button" type="CheckButton" parent="UI/Panel/ColorRect/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 focus_mode = 0
 theme_override_icons/checked = ExtResource("8_scr8v")
@@ -670,6 +304,7 @@ theme_override_icons/unchecked = ExtResource("9_6jpye")
 shortcut_in_tooltip = false
 
 [node name="FastForwardButton" type="CheckButton" parent="UI/Panel/ColorRect/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 focus_mode = 0
 theme_override_colors/font_hover_color = Color(0.690196, 0.690196, 0.690196, 1)
@@ -678,6 +313,7 @@ theme_override_icons/unchecked = ExtResource("12_rdgd4")
 shortcut_in_tooltip = false
 
 [node name="SkipButton" type="CheckButton" parent="UI/Panel/ColorRect/HBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 focus_mode = 0
 theme_override_colors/font_hover_color = Color(0.690196, 0.690196, 0.690196, 1)
@@ -694,8 +330,8 @@ offset_bottom = 48.0
 
 [node name="Song Progress" type="HSlider" parent="UI/Panel"]
 layout_mode = 0
-offset_top = -16.0
 offset_right = 1280.0
+offset_bottom = 16.0
 theme = ExtResource("5_qommj")
 step = 0.001
 scrollable = false
@@ -739,6 +375,82 @@ horizontal_alignment = 1
 vertical_alignment = 1
 metadata/_edit_lock_ = true
 
+[node name="MenuBar" type="ColorRect" parent="UI"]
+offset_left = -640.0
+offset_top = -360.0
+offset_right = 640.0
+offset_bottom = -336.0
+theme = ExtResource("5_qommj")
+color = Color(0, 0, 0, 1)
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/MenuBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+metadata/_edit_lock_ = true
+
+[node name="File Button" type="MenuButton" parent="UI/MenuBar/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "File"
+item_count = 4
+popup/item_0/text = "New File"
+popup/item_0/id = 0
+popup/item_1/text = "Open File"
+popup/item_1/id = 1
+popup/item_2/text = "Save File"
+popup/item_2/id = 2
+popup/item_3/text = "Convert Chart File"
+popup/item_3/id = 3
+
+[node name="Edit Button" type="MenuButton" parent="UI/MenuBar/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Edit
+"
+item_count = 3
+popup/item_0/text = "Edit Metadata"
+popup/item_0/id = 0
+popup/item_1/text = "Edit Tempo Data"
+popup/item_1/id = 1
+popup/item_2/text = "Edit Meter Data"
+popup/item_2/id = 2
+
+[node name="Strum Button" type="MenuButton" parent="UI/MenuBar/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Strum"
+item_count = 3
+popup/item_0/text = "Add Strumline"
+popup/item_0/id = 0
+popup/item_1/text = "Remove Strumline"
+popup/item_1/id = 1
+popup/item_2/text = "Toggle Strumlines"
+popup/item_2/id = 2
+
+[node name="Video Button" type="MenuButton" parent="UI/MenuBar/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Video
+"
+
+[node name="Audio Button" type="MenuButton" parent="UI/MenuBar/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Audio
+"
+item_count = 2
+popup/item_0/text = "Beat Sounds"
+popup/item_0/checkable = 1
+popup/item_0/checked = true
+popup/item_0/id = 0
+popup/item_1/text = "Step Sounds"
+popup/item_1/checkable = 1
+popup/item_1/id = 1
+
 [node name="ParallaxBackground" type="ParallaxBackground" parent="." groups=["layer"]]
 layer = 1
 offset = Vector2(640, 360)
@@ -750,16 +462,10 @@ motion_mirroring = Vector2(0, 512)
 
 [node name="Grid" parent="ParallaxBackground/ParallaxLayer" instance=ExtResource("14_6mdnm")]
 unique_name_in_owner = true
-modulate = Color(0.678431, 0.588235, 1, 1)
 position = Vector2(0, -296)
 centered = true
+grid_color = Color(0.329412, 0.329412, 0.329412, 1)
 event_column_color = Color(0, 0, 0, 0.254902)
-
-[node name="ColorRect" type="ColorRect" parent="ParallaxBackground/ParallaxLayer/Grid"]
-offset_left = -144.0
-offset_right = 144.0
-offset_bottom = 32.0
-color = Color(0.627451, 0, 0.52549, 0.47451)
 
 [node name="Chart Editor UI" type="CanvasLayer" parent="." groups=["layer"]]
 offset = Vector2(640, 360)
@@ -767,6 +473,7 @@ transform = Transform2D(1, 0, 0, 1, 640, 360)
 follow_viewport_enabled = true
 
 [node name="Song Pos Marker" type="ColorRect" parent="Chart Editor UI"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 4)
 anchors_preset = 8
 anchor_left = 0.5
@@ -804,25 +511,12 @@ metadata/_edit_lock_ = true
 
 [connection signal="new_beat" from="Conductor" to="." method="_on_conductor_new_beat"]
 [connection signal="new_step" from="Conductor" to="." method="_on_conductor_new_step"]
-[connection signal="value_changed" from="UI/Brush Settings/Note Brush/Note Length Label/Note Length" to="." method="_on_note_length_value_changed"]
 [connection signal="value_changed" from="UI/Brush Settings/Note Brush/Note Type/Note Type" to="." method="_on_note_type_value_changed"]
-[connection signal="text_changed" from="UI/Brush Settings/Event Brush/Event Name" to="." method="_on_event_name_text_changed"]
-[connection signal="text_changed" from="UI/Brush Settings/Event Brush/Event Parameters" to="." method="_on_event_parameters_text_changed"]
-[connection signal="toggled" from="UI/Charting Tabs/Editor/Beat Sounds Check Box" to="." method="_on_beat_sounds_check_box_toggled"]
-[connection signal="toggled" from="UI/Charting Tabs/Editor/Step Sounds Check Box" to="." method="_on_step_sounds_check_box_toggled"]
 [connection signal="value_changed" from="UI/Charting Tabs/Editor/Vocals Slider" to="." method="_on_vocals_slider_value_changed"]
 [connection signal="value_changed" from="UI/Charting Tabs/Editor/Instrumental Slider" to="." method="_on_instrumental_slider_value_changed"]
 [connection signal="value_changed" from="UI/Charting Tabs/Editor/Speed Slider" to="." method="_on_speed_slider_value_changed"]
 [connection signal="value_changed" from="UI/Charting Tabs/Editor/Hit Sound Volume" to="." method="_on_hit_sound_volume_value_changed"]
 [connection signal="pressed" from="UI/Charting Tabs/Editor/SaveButton" to="." method="_on_save_button_pressed"]
-[connection signal="pressed" from="UI/Charting Tabs/Tempo/Add Tempo" to="." method="_on_add_tempo_pressed"]
-[connection signal="pressed" from="UI/Charting Tabs/Meter/Add Meter" to="." method="_on_add_meter_pressed"]
-[connection signal="pressed" from="UI/Charting Tabs/Chart/Strum Text/Set Strum" to="." method="_on_set_strum_pressed"]
-[connection signal="pressed" from="UI/Charting Tabs/Chart/Scroll Speed/Set Scroll Speed" to="." method="_on_set_scroll_speed_pressed"]
-[connection signal="pressed" from="UI/Charting Tabs/Chart/Offset/Offset Button" to="." method="_on_offset_button_pressed"]
-[connection signal="pressed" from="UI/Charting Tabs/Chart/Song Title/Set Song Title" to="." method="_on_set_song_title_pressed"]
-[connection signal="pressed" from="UI/Charting Tabs/Chart/Song Artist/Set Artist" to="." method="_on_set_artist_pressed"]
-[connection signal="pressed" from="UI/Charting Tabs/Chart/Difficulty/Set Difficulty" to="." method="_on_set_difficulty_pressed"]
 [connection signal="pressed" from="UI/Panel/ColorRect/HBoxContainer/RestartButton" to="." method="_on_restart_button_pressed"]
 [connection signal="pressed" from="UI/Panel/ColorRect/HBoxContainer/RewindButton" to="." method="_on_rewind_button_pressed"]
 [connection signal="toggled" from="UI/Panel/ColorRect/HBoxContainer/Pause Button" to="." method="_on_pause_button_toggled"]

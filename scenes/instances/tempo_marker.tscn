@@ -1,0 +1,43 @@
+[gd_scene load_steps=3 format=3 uid="uid://jtrj3xl3n5s4"]
+
+[ext_resource type="Script" path="res://scenes/instances/tempo_marker.gd" id="1_p6j5i"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_0disy"]
+font_size = 11
+outline_size = 8
+outline_color = Color(0, 0, 0, 1)
+
+[node name="Tempo Marker" type="Node2D"]
+script = ExtResource("1_p6j5i")
+
+[node name="Polygon2D" type="Polygon2D" parent="."]
+color = Color(0.0705882, 0.0705882, 0.0705882, 0.847059)
+polygon = PackedVector2Array(0, 0, 8, -8, 8, 8)
+
+[node name="Label" type="Label" parent="."]
+offset_left = 8.0
+offset_top = -8.0
+offset_right = 48.0
+offset_bottom = 8.0
+text = "60"
+label_settings = SubResource("LabelSettings_0disy")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ColorRect" type="ColorRect" parent="Label"]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0705882, 0.0705882, 0.0705882, 0.847059)
+metadata/_edit_lock_ = true
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
+position = Vector2(28, -3.38813e-21)
+scale = Vector2(2.8, 1.6)
+
+[connection signal="screen_entered" from="VisibleOnScreenNotifier2D" to="." method="_on_visible_on_screen_notifier_2d_screen_entered"]
+[connection signal="screen_exited" from="VisibleOnScreenNotifier2D" to="." method="_on_visible_on_screen_notifier_2d_screen_exited"]

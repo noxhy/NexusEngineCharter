@@ -19,8 +19,8 @@ signal new_step(current_step: int, measure_relative: int)
 # 4/16 = (♬♬ ♬♬ ♬♬ ♬♬) - Default
 # 4/12 = (♪♪♪ ♪♪♪ ♪♪♪ ♪♪♪) - Triplets
 
-@onready var beats_per_measure = 4  	# The amount of beats in a measure (Default: 4)
-@onready var steps_per_measure = 4 * beats_per_measure  	# The amount of notes in a measure (Default: 16)
+@onready var beats_per_measure: int = 4  	# The amount of beats in a measure (Default: 4)
+@onready var steps_per_measure: int = 4 * beats_per_measure  	# The amount of notes in a measure (Default: 16)
 
 var seconds_per_beat = 60.0 / tempo
 
@@ -43,8 +43,9 @@ func _process(_delta):
 		var time = get_node(stream_player).get_playback_position() + (offset / 1000.0)
 		time -= AudioServer.get_output_latency()
 		
-		current_beat = int(time * tempo / 60.0)
-		current_step = int( time * ( tempo * (steps_per_measure / beats_per_measure) ) / 60.0 )
+		current_beat = int( time * tempo / 60.0 )
+		@warning_ignore("integer_division")
+		current_step = int( time * ( tempo * ( steps_per_measure / beats_per_measure ) ) / 60.0 )
 		
 		measure_relative_beat = current_beat % beats_per_measure
 		measure_relative_step = current_step % steps_per_measure

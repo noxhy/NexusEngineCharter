@@ -1,0 +1,102 @@
+[gd_scene load_steps=3 format=3 uid="uid://cfnmjg10vx5vf"]
+
+[ext_resource type="Script" path="res://scenes/instances/event_editor.gd" id="1_v83sl"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_o27l6"]
+bg_color = Color(0.176471, 0.176471, 0.176471, 1)
+expand_margin_left = 48.0
+
+[node name="Event Editor" type="Window"]
+title = "Event Edtior"
+initial_position = 4
+size = Vector2i(640, 240)
+exclusive = true
+always_on_top = true
+min_size = Vector2i(480, 240)
+script = ExtResource("1_v83sl")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+custom_minimum_size = Vector2(0, 240)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 8.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer"]
+custom_minimum_size = Vector2(312, 0)
+layout_mode = 2
+alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="HBoxContainer/VBoxContainer"]
+custom_minimum_size = Vector2(312, 192)
+layout_mode = 2
+size_flags_horizontal = 8
+theme_override_styles/panel = SubResource("StyleBoxFlat_o27l6")
+horizontal_scroll_mode = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/VBoxContainer/ScrollContainer"]
+layout_mode = 2
+
+[node name="HSeparator" type="HSeparator" parent="HBoxContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="Event Name" type="LineEdit" parent="HBoxContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(128, 0)
+layout_mode = 2
+placeholder_text = "Event Name"
+
+[node name="Add Event Button" type="Button" parent="HBoxContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.556863, 0.576471, 1, 1)
+text = "Add Event"
+
+[node name="VSeparator" type="VSeparator" parent="HBoxContainer"]
+modulate = Color(1, 1, 1, 0)
+custom_minimum_size = Vector2(12, 0)
+layout_mode = 2
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="HBoxContainer"]
+custom_minimum_size = Vector2(312, 0)
+layout_mode = 2
+alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="HBoxContainer/VBoxContainer2"]
+custom_minimum_size = Vector2(0, 192)
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/VBoxContainer2/ScrollContainer"]
+custom_minimum_size = Vector2(312, 0)
+layout_mode = 2
+
+[node name="HSeparator" type="HSeparator" parent="HBoxContainer/VBoxContainer2"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/VBoxContainer2"]
+layout_mode = 2
+alignment = 1
+
+[node name="Add Parameter" type="Button" parent="HBoxContainer/VBoxContainer2/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Add Parameter"
+
+[node name="Delete Event Button" type="Button" parent="HBoxContainer/VBoxContainer2/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.247059, 0.333333, 1)
+text = "Delete Event"
+
+[connection signal="close_requested" from="." to="." method="_on_close_requested"]
+[connection signal="pressed" from="HBoxContainer/VBoxContainer/HBoxContainer/Add Event Button" to="." method="_on_add_event_button_pressed"]
+[connection signal="pressed" from="HBoxContainer/VBoxContainer2/HBoxContainer/Add Parameter" to="." method="_on_add_parameter_pressed"]
+[connection signal="pressed" from="HBoxContainer/VBoxContainer2/HBoxContainer/Delete Event Button" to="." method="_on_remove_event_button_pressed"]

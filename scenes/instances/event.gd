@@ -29,28 +29,6 @@ func _ready():
 	$Label.visible = on_screen
 
 
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	
-	if on_screen:
-		$Label.text = event_name
-		$Label.text += "\n" + "{ "
-		
-		$Event.scale = Vector2(64, 64) / Vector2( $Event.texture.get_width(), $Event.texture.get_height() )
-		$Outline.scale = Vector2(64, 64) / Vector2( $Outline.texture.get_width(), $Outline.texture.get_height() )
-		
-		var index = 0
-		
-		for i in parameters:
-			
-			var comma = "" if ( index == parameters.size() - 1) else ", "
-			$Label.text += str(i) + comma
-			index += 1
-		
-		$Label.text += " }"
-		
-
-
 func _on_visible_on_screen_notifier_2d_screen_entered():
 	on_screen = true
 	

@@ -683,12 +683,6 @@ position = Vector2(0, -296)
 centered = true
 event_column_color = Color(0, 0, 0, 0.254902)
 
-[node name="ColorRect" type="ColorRect" parent="ParallaxBackground/ParallaxLayer/Grid"]
-offset_left = -144.0
-offset_right = 144.0
-offset_bottom = 32.0
-color = Color(0.627451, 0, 0.52549, 0.47451)
-
 [node name="Chart Editor UI" type="CanvasLayer" parent="." groups=["layer"]]
 offset = Vector2(640, 360)
 transform = Transform2D(1, 0, 0, 1, 640, 360)

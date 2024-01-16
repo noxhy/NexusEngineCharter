@@ -25,6 +25,7 @@ scale = Vector2(1.08789, 1.09033)
 rect = Rect2(-10, -10, 64, 64)
 
 [node name="Label" type="Label" parent="."]
+visible = false
 modulate = Color(1, 1, 1, 0.603922)
 anchors_preset = 6
 anchor_left = 1.0
@@ -38,8 +39,6 @@ offset_bottom = 35.0
 grow_horizontal = 0
 grow_vertical = 2
 size_flags_horizontal = 8
-text = "Event Name
-Event Parameters"
 horizontal_alignment = 2
 vertical_alignment = 1
 

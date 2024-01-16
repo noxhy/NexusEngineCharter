@@ -1,42 +1,43 @@
-[gd_scene load_steps=3 format=3 uid="uid://mm1muuhm1a5t"]
+[gd_scene load_steps=2 format=3 uid="uid://mm1muuhm1a5t"]
 
 [ext_resource type="Script" path="res://scenes/instances/tempo_list_node.gd" id="1_a02j2"]
-[ext_resource type="Theme" uid="uid://bebg8dyoq0am0" path="res://chart_editor.tres" id="2_0cmrq"]
 
-[node name="Tempo List Node" type="PanelContainer"]
-custom_minimum_size = Vector2i(256, 24)
-offset_right = 256.0
-offset_bottom = 26.0
+[node name="Tempo List Node" type="HBoxContainer"]
+custom_minimum_size = Vector2(256, 32)
+offset_right = 480.0
+offset_bottom = 31.0
 script = ExtResource("1_a02j2")
-time = 2391.73
-tempo = 120.5
 
 [node name="Time" type="Label" parent="."]
-custom_minimum_size = Vector2i(96, 0)
-offset_right = 96.0
-offset_bottom = 26.0
+custom_minimum_size = Vector2(96, 0)
+layout_mode = 2
 size_flags_horizontal = 0
-text = "0:00.023"
+text = " 0:00.023"
 vertical_alignment = 1
+justification_flags = 161
 clip_text = true
 text_overrun_behavior = 1
 
+[node name="VSeparator" type="VSeparator" parent="."]
+custom_minimum_size = Vector2(96, 0)
+layout_mode = 2
+
 [node name="Tempo" type="Label" parent="."]
-custom_minimum_size = Vector2i(64, 0)
-offset_left = 96.0
-offset_right = 160.0
-offset_bottom = 26.0
+custom_minimum_size = Vector2(96, 0)
+layout_mode = 2
 size_flags_horizontal = 4
 text = "120.5"
 vertical_alignment = 1
 
+[node name="VSeparator2" type="VSeparator" parent="."]
+custom_minimum_size = Vector2(96, 0)
+layout_mode = 2
+
 [node name="Delete Buttom" type="Button" parent="."]
-custom_minimum_size = Vector2i(64, 0)
-offset_left = 192.0
-offset_right = 256.0
-offset_bottom = 26.0
+custom_minimum_size = Vector2(64, 0)
+layout_mode = 2
 size_flags_horizontal = 8
-theme = ExtResource("2_0cmrq")
+theme_override_colors/font_color = Color(1, 0.247059, 0.333333, 1)
 text = "Delete"
 
 [connection signal="pressed" from="Delete Buttom" to="." method="_on_delete_buttom_pressed"]

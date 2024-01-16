@@ -1,0 +1,25 @@
+[gd_scene load_steps=2 format=3 uid="uid://byit62n5wjl3t"]
+
+[ext_resource type="Script" path="res://scenes/instances/event_parameter_node.gd" id="1_dnwq2"]
+
+[node name="Parameter Node" type="HBoxContainer"]
+custom_minimum_size = Vector2(296, 0)
+offset_right = 297.0
+offset_bottom = 31.0
+script = ExtResource("1_dnwq2")
+
+[node name="LineEdit" type="LineEdit" parent="."]
+custom_minimum_size = Vector2(216, 0)
+layout_mode = 2
+placeholder_text = "Parameter Value"
+
+[node name="VSeparator" type="VSeparator" parent="."]
+layout_mode = 2
+
+[node name="Button" type="Button" parent="."]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.247059, 0.333333, 1)
+text = "Delete"
+
+[connection signal="text_submitted" from="LineEdit" to="." method="_on_line_edit_text_submitted"]
+[connection signal="pressed" from="Button" to="." method="_on_button_pressed"]

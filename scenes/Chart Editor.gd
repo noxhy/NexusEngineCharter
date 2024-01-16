@@ -4,6 +4,19 @@ const tempo_list_preload = preload("res://scenes/instances/tempo_list_node.tscn"
 const meter_list_preload = preload("res://scenes/instances/meters_list_node.tscn")
 const chart_arrow_preload = preload("res://scenes/instances/arrow.tscn")
 const event_preload = preload("res://scenes/instances/event.tscn")
+const divider_preload = preload("res://scenes/instances/divider.tscn")
+const tempo_marker_preload = preload( "res://scenes/instances/tempo_marker.tscn" )
+
+# Popup preloads
+const new_file_popup_preload = preload("res://scenes/instances/new_file_popup.tscn")
+const open_file_popup_preload = preload("res://scenes/instances/open_file_popup.tscn")
+const convert_chart_popup_preload = preload("res://scenes/instances/convert_chart_popup.tscn")
+
+const edit_metadata_popup_preload = preload("res://scenes/instances/edit_metadata_popup.tscn")
+const timings_editor_popup_preload = preload("res://scenes/instances/timings_editor.tscn")
+const meter_editor_popup_preload = preload("res://scenes/instances/meters_editor.tscn")
+const event_editor_popup_preload = preload("res://scenes/instances/event_editor.tscn")
+const toggle_strums_popup_preload = preload("res://scenes/instances/toggle_strums_popup.tscn")
 
 @export var chart = Chart.new()
 @export var chart_zoom = Vector2(1, 1)
@@ -13,7 +26,7 @@ const event_preload = preload("res://scenes/instances/event.tscn")
 @onready var step_sounds = false
 
 @export var strum_count = 4
-@export var highlight_color = Color(1, 1, 1, 0.5)
+@export var highlight_color = Color( 1, 1, 1, 0.5 )
 
 var playback_speed = 1.0
 
@@ -23,12 +36,15 @@ var instrumental_length = 0.0
 var tempo_list = []
 var meter_list = []
 var measure_marker_list = []
+var events_dict = {}
 
-var note_instances = []
-var passed_note_instances = []
-var event_instances = []
+var note_instances: Array = []
+var passed_note_instances: Array = []
+var event_instances: Array = []
+var divider_instances: Array = []
+var tempo_marker_instances: Array = []
 
-var chart_grid = Vector2(32, 32)
+var chart_grid = Vector2( 32, 32 )
 var chart_snap = 4
 
 var follow_marker = true
@@ -38,83 +54,44 @@ var old_tempo = 0.0
 var old_time = -1.0
 
 var dragging_time = false
+var pressing_ctrl = false
+var placing_note = false
 
 var layers = []
 var selected_note = []
-var pressing_ctrl = false
+var lanes_disabled: PackedInt32Array
 
-var brush_note_length = 0.0
 var brush_note_type: int = 0
 
-var brush_event_name = ""
-var brush_event_parameters = ""
+var can_chart = false
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	
-	# Initialization of shit
-	
-	if Global.file != "res://":
-		chart = load( Global.file )
-	
-	$Music/Vocals.stream = read_audio_file(chart.vocals)
-	$Music/Instrumental.stream = read_audio_file(chart.instrumental)
-	
-	$Conductor.tempo = chart.get_tempos_data().get(0.0)
-	
-	$Conductor.beats_per_measure = chart.get_meters_data().get(0.0)[0]
-	$Conductor.steps_per_measure = chart.get_meters_data().get(0.0)[1]
-	
-	$"UI/Charting Tabs/Chart/Song Title".text = chart.song_title
-	$"UI/Charting Tabs/Chart/Song Artist".text = chart.artist
-	$"UI/Charting Tabs/Chart/Difficulty".text = chart.difficulty
-	$"UI/Charting Tabs/Chart/Offset".text = str(chart.offset)
-	$"UI/Charting Tabs/Chart/Scroll Speed".text = str(chart.scroll_speed)
-	
-	$Music/Vocals.play()
-	$Music/Instrumental.play()
-	
-	if( $Music/Vocals.stream != null ):
-		vocals_length = $Music/Vocals.stream.get_length()
-	
-	instrumental_length = $Music/Instrumental.stream.get_length()
-	
-	update_tempo_list()
-	update_meter_list()
-	
-	offset = chart.offset
-	$Conductor.offset = chart.offset
-	
-	render_events()
 	
 	# Layer Offset
 	
 	layers = get_tree().get_nodes_in_group("layer")
 	for i in layers: i.layer -= layers.size()
+	
+	# Menu Bar Initialization
+	%"File Button".get_popup().connect( "id_pressed", self.file_button_item_pressed )
+	%"Edit Button".get_popup().connect( "id_pressed", self.edit_button_item_pressed )
+	%"Strum Button".get_popup().connect( "id_pressed", self.strum_button_item_pressed )
+	%"Audio Button".get_popup().connect( "id_pressed", self.audio_button_item_pressed )
 
 
-func _process(delta):
+func _process(_delta):
 	
 	## Details
 	
 	$"UI/Conductor Stats/Details/Details".text = "Tempo: " + str( $Conductor.tempo )
-	$"UI/Conductor Stats/Details/Details".text += "\n" + "Beat Snap: " + str( 1 ) + " / " + str( chart_snap )
+	$"UI/Conductor Stats/Details/Details".text += "\n" + "Meter: " + str( $Conductor.beats_per_measure ) + " / " + str( $Conductor.steps_per_measure )
+	$"UI/Conductor Stats/Details/Details".text += "\n\n" + "Beat Snap: " + str( 1 ) + " / " + str( chart_snap )
 	$"UI/Conductor Stats/Details/Details".text += "\n" + "Playback Speed: " + str(playback_speed) + "x"
-	
-	## Conductor Stats String
-	
-	$"UI/Conductor Stats/Conductor/Conductor Stats".text = "Tempo: " + str( $Conductor.tempo )
-	$"UI/Conductor Stats/Conductor/Conductor Stats".text += "\n" + "Meter: " + str( $Conductor.beats_per_measure ) + " / " + str( $Conductor.steps_per_measure )
-	$"UI/Conductor Stats/Conductor/Conductor Stats".text += "\n"
-	
-	$"UI/Conductor Stats/Conductor/Conductor Stats".text += "\n" + "Current: (" + str( $Conductor.current_beat + 1 ) + ", " + str( $Conductor.current_step + 1 ) + ")"
-	$"UI/Conductor Stats/Conductor/Conductor Stats".text += "\n" + "Measure Relative: (" + str( $Conductor.measure_relative_beat + 1 ) + ", " + str( $Conductor.measure_relative_step + 1 ) + ")"
-	
 	
 	$Music/Vocals.pitch_scale = playback_speed
 	$Music/Instrumental.pitch_scale = playback_speed
 	
-	$"UI/Brush Settings/Note Brush/Note Length Label/Note Length".custom_arrow_step = 1.0 / chart_snap
 	
 	if $Music/Instrumental.playing:
 		
@@ -125,21 +102,22 @@ func _process(delta):
 		$"UI/Panel/Song Progress/Time Display Progress".text = float_to_time( song_position )
 		$"UI/Panel/Song Progress/Time Display Finish".text = "-" + float_to_time( instrumental_length - song_position )
 		
-		var tempo_at = get_tempo_at( song_position )
+		var tempo_at = get_tempo_at( song_position )[1]
 		$Conductor.tempo = tempo_at
 		$Conductor.seconds_per_beat = 60.0 / tempo_at
 		
 		if old_tempo != tempo_at:
+			
 			old_tempo = tempo_at
 			render_notes()
+			render_tempo_markers()
 		
 		var meter_at = get_meter_at( song_position )
-		$Conductor.beats_per_measure = meter_at[0]
-		$Conductor.steps_per_measure = meter_at[1]
-		chart_render(delta)
+		$Conductor.beats_per_measure = meter_at[1]
+		$Conductor.steps_per_measure = meter_at[2]
+		render_chart()
 		
 		check_notes( song_position )
-		
 	
 	
 	$"UI/Panel/Song Progress/Time Display Drag".visible = dragging_time
@@ -152,149 +130,238 @@ func _process(delta):
 	
 	queue_redraw()
 	
-	$UI/Panel/ColorRect/ExtraLabel.text = "Chart Zoom: " + str(chart_zoom)
-	$UI/Panel/ColorRect/ExtraLabel.text += "\n" + "Notes Drawn: " + str(note_instances.size()) + "/" + str( chart.get_note_data().size() )
+	$UI/Panel/ColorRect/ExtraLabel.text = "Notes Drawn: " + str(note_instances.size()) + "/" + str( chart.get_note_data().size() )
 	$UI/Panel/ColorRect/ExtraLabel.text += " • " + "Events Drawn: " + str(event_instances.size()) + "/" + str( chart.get_events_data().size() )
+	
+	#
+	## Inputs
+	#
+	
 	
 	if Input.is_action_just_pressed("toggle_song"):
 		
-		$Music/Vocals.stream_paused = !$Music/Vocals.stream_paused
-		$Music/Instrumental.stream_paused = !$Music/Instrumental.stream_paused
-		$"UI/Panel/ColorRect/HBoxContainer/Pause Button".button_pressed = $Music/Instrumental.stream_paused
+		if can_chart:
+			
+			$Music/Vocals.stream_paused = !$Music/Vocals.stream_paused
+			$Music/Instrumental.stream_paused = !$Music/Instrumental.stream_paused
+			$"UI/Panel/ColorRect/HBoxContainer/Pause Button".button_pressed = $Music/Instrumental.stream_paused
+	
 	
 	if Input.is_action_just_released("ui_cancel"):
 		
 		render_notes()
 		render_events()
 	
+	
 	if Input.is_action_just_released("debug"):
 		check_notes()
 	
+	
 	pressing_ctrl = Input.is_action_pressed("drag_enable")
+	
 	
 	if Input.is_action_just_pressed("mouse_left"):
 		
-		var lane = grid_position_to_time( get_global_mouse_position() ).x
-		var time = grid_position_to_time( get_global_mouse_position() ).y
-		
-		time = format_time(time)
-		
-		if lane >= 0 && lane <= strum_count - 1:
+		if can_chart:
 			
-			var camera_offset = $Camera2D.position.y - 360
+			var grid_position: Vector2 = grid_position_to_time( get_global_mouse_position() )
 			
-			if get_global_mouse_position().y >= 64 + camera_offset && get_global_mouse_position().y <= 640 + camera_offset:
+			var lane = grid_position.x
+			var time = grid_position.y
+			
+			time = format_time(time)
+			
+			if ( lane >= 0 ) && lane <= ( strum_count - 1 ):
 				
-				if is_slot_filled(time, lane):
+				var camera_offset = $Camera2D.position.y - 360
+				
+				if get_global_mouse_position().y >= 64 + camera_offset && get_global_mouse_position().y <= 640 + camera_offset:
 					
-					if pressing_ctrl:
+					if is_slot_filled( time, lane ):
 						
-						for i in selected_note:
+						if pressing_ctrl:
 							
-							chart.chart_data.notes.remove_at( i )
-							
-							for j in selected_note:
+							for i in selected_note:
 								
-								if j > i:
-									selected_note[ selected_note.find(j) ] = j - 1
+								if !lanes_disabled.has(lane):
+									
+									chart.chart_data.notes.remove_at(i)
+									
+									for j in selected_note:
+										
+										if j > i: selected_note[ selected_note.find(j) ] = j - 1
+						
+						else: chart.chart_data.notes.remove_at( find_note(time, lane) )
+						
+						selected_note = []
+					
 					else:
 						
-						chart.chart_data.notes.remove_at( find_note(time, lane) )
+						if time > 0:
+							
+							placing_note = true
+							chart.chart_data.notes.append( [ time, lane, 0, brush_note_type ] )
+							chart.chart_data.notes.sort_custom(sort_ascending)
+							selected_note = [ find_note( time, lane ) ]
 					
-					selected_note = []
-				else:
-					
-					chart.chart_data.notes.append( [time, lane, brush_note_length, brush_note_type] )
-					
-					if pressing_ctrl: selected_note.append( find_note(time, lane) )
-					else: selected_note = [ find_note(time, lane) ]
-				
-				render_notes()
-		elif lane == -1:
+					render_notes()
 			
-			var camera_offset = $Camera2D.position.y - 360
-			
-			if get_global_mouse_position().y >= 64 + camera_offset && get_global_mouse_position().y <= 640 + camera_offset:
+			elif lane == -1:
 				
-				if is_slot_filled_event(time):
+				var camera_offset = $Camera2D.position.y - 360
+				
+				if get_global_mouse_position().y >= 64 + camera_offset && get_global_mouse_position().y <= 640 + camera_offset:
 					
-					if pressing_ctrl:
+					if is_slot_filled_event(time):
 						
-						chart.chart_data.events.append( [time, brush_event_name, brush_event_parameters.split("\n")] )
+						can_chart = false
+						popup_event_editor(time)
 					else:
 						
-						chart.chart_data.events.remove_at( find_event( time ) )
-				else:
+						can_chart = false
+						popup_event_editor(time)
 					
-					chart.chart_data.events.append( [time, brush_event_name, brush_event_parameters.split("\n")] )
+					render_events()
+	
+	
+	## Long note dragging
+	if Input.is_action_pressed("mouse_left"):
+		
+		if can_chart:
+			
+			if placing_note:
 				
-				render_events()
+				for index in selected_note:
+					
+					var note: Array = chart.get_note_data()[index]
+					
+					var time: float = note[0]
+					var lane: int = note[1]
+					var note_type: int = note[3]
+					
+					var cursor_time = grid_position_to_time( get_global_mouse_position() ).y
+					
+					var distance = snappedf( clamp( cursor_time - time, 0.0, 16.0 ) / %Conductor.seconds_per_beat, 1.0 / chart_snap )
+					chart.chart_data.notes[ index ] = [ time, lane, distance, note_type ]
+					
+					if distance > 0:
+						
+						for note_instance in note_instances:
+							
+							if note_instance.time == time && note_instance.lane == lane:
+								
+								note_instance.length = distance
+								break
+							
+							else: continue
+	
+	
+	if Input.is_action_just_released("mouse_left"): placing_note = false
 	
 	
 	if Input.is_action_just_pressed("mouse_middle"):
 		
-		var lane = grid_position_to_time( get_global_mouse_position() ).x
-		var time = grid_position_to_time( get_global_mouse_position() ).y
-		
-		time = format_time(time)
-		
-		if lane >= 0 && lane <= strum_count - 1:
+		if can_chart:
 			
-			var camera_offset = $Camera2D.position.y - 360
+			var grid_position: Vector2 = grid_position_to_time( get_global_mouse_position() )
 			
-			if get_global_mouse_position().y >= 64 + camera_offset && get_global_mouse_position().y <= 640 + camera_offset:
+			var lane = grid_position.x
+			var time = grid_position.y
+			
+			time = format_time(time)
+			
+			if lane >= 0 && lane <= strum_count - 1:
 				
-				if is_slot_filled(time, lane):
+				var camera_offset = $Camera2D.position.y - 360
+				
+				if get_global_mouse_position().y >= 64 + camera_offset && get_global_mouse_position().y <= 640 + camera_offset:
 					
-					selected_note.append( find_note(time, lane) )
-				
-				render_notes()
+					if is_slot_filled(time, lane):
+						
+						selected_note.append( find_note(time, lane) )
+					
+					render_notes()
+	
 	
 	if Input.is_action_just_released("scroll_up"):
 		
-		if pressing_ctrl:
-			
-			chart_snap += 1
+		if pressing_ctrl: chart_snap = clamp( chart_snap + 1, 1, 64 )
+		
 		else:
+			
 			if $Music/Instrumental.stream_paused:
 				
-				passed_note_instances = []
-				
-				var song_position = $Music/Instrumental.get_playback_position()
-				var snap = ( 60.0 / get_tempo_at( song_position ) ) / ( get_meter_at( song_position )[1] / get_meter_at( song_position )[0] )
-				
-				$Music/Vocals.play( song_position - snap )
-				$Music/Instrumental.play( song_position - snap )
-				
-				$Music/Vocals.stream_paused = true
-				$Music/Instrumental.stream_paused = true
-				
-				chart_render( delta )
-				render_notes( song_position )
-				render_events( song_position )
+				if can_chart:
+					
+					passed_note_instances = []
+					
+					var song_position = $Music/Instrumental.get_playback_position()
+					var snap = ( 60.0 / get_tempo_at( song_position )[1] ) / ( get_meter_at( song_position )[2] / get_meter_at( song_position )[1] )
+					
+					song_position = snappedf( song_position - snap, snap )
+					song_position = clamp( song_position, 0, $Music/Instrumental.stream.get_length() )
+					
+					$Music/Vocals.play( song_position )
+					$Music/Instrumental.play( song_position )
+					
+					$Music/Vocals.stream_paused = true
+					$Music/Instrumental.stream_paused = true
+					
+					render_chart()
+					render_notes( song_position )
+					render_events( song_position )
+	
 	
 	if Input.is_action_just_released("scroll_down"):
 		
-		if pressing_ctrl:
-			
-			chart_snap -= 1
+		if pressing_ctrl: chart_snap = clamp( chart_snap - 1, 1, 64 )
+		
 		else:
+			
 			if $Music/Instrumental.stream_paused:
 				
-				passed_note_instances = []
-				
-				var song_position = $Music/Instrumental.get_playback_position()
-				var snap = ( 60.0 / get_tempo_at( song_position ) ) / ( get_meter_at( song_position )[1] / get_meter_at( song_position )[0] )
-				
-				$Music/Vocals.play( song_position + snap )
-				$Music/Instrumental.play( song_position + snap )
-				
-				$Music/Vocals.stream_paused = true
-				$Music/Instrumental.stream_paused = true
-				
-				chart_render( delta )
-				render_notes( song_position )
-				render_events( song_position )
+				if can_chart:
+					
+					passed_note_instances = []
+					
+					var song_position = $Music/Instrumental.get_playback_position()
+					var snap = ( 60.0 / get_tempo_at( song_position )[1] ) / ( get_meter_at( song_position )[2] / get_meter_at( song_position )[1] )
+					
+					song_position = snappedf( song_position + snap, snap )
+					song_position = clamp( song_position, 0, $Music/Instrumental.stream.get_length() )
+					
+					$Music/Vocals.play( song_position )
+					$Music/Instrumental.play( song_position )
+					
+					$Music/Vocals.stream_paused = true
+					$Music/Instrumental.stream_paused = true
+					
+					render_chart()
+					render_notes( song_position )
+					render_events( song_position )
+	
+	
+	if Input.is_action_just_pressed("zoom_in"):
+		
+		if pressing_ctrl:
+			
+			chart_zoom.y = clamp( chart_zoom.y + 0.1, 0.1, 2 )
+			
+			render_chart()
+			render_notes()
+			render_events()
+	
+	
+	if Input.is_action_just_pressed("zoom_out"):
+		
+		if pressing_ctrl:
+			
+			chart_zoom.y = clamp( chart_zoom.y - 0.1, 0.1, 2 )
+			
+			render_chart()
+			render_notes()
+			render_events()
+	
 
 
 func _on_conductor_new_beat(_current_beat, measure_relative):
@@ -326,7 +393,7 @@ func _on_conductor_new_beat(_current_beat, measure_relative):
 	tween.tween_property($Background/Background, "scale", Vector2(1, 1), 0.2).set_delay(0.0125)
 
 
-func _on_conductor_new_step(current_step, measure_relative):
+func _on_conductor_new_step(_current_step, _measure_relative):
 	
 	if step_sounds:
 		$"Conductor/Step Sound".play(0.56)
@@ -374,7 +441,6 @@ func read_audio_file(path: String):
 		
 		content = AudioStreamMP3.new()
 		content.data = file.get_buffer(file.get_length())
-		
 	
 	return content
 
@@ -438,134 +504,47 @@ func _on_save_button_pressed():
 # Tempo List Shit
 
 
-func update_tempo_list():
-	
-	
-	# Clear List
-	
-	for i in tempo_list.size():
-		
-		tempo_list[0].queue_free()
-		tempo_list.remove_at(0)
-	
-	var tempo_dict = chart.get_tempos_data()
-	var keys = tempo_dict.keys()
-	
-	
-	for i in keys.size():
-		
-		var dict_time = keys[i]
-		var dict_tempo = tempo_dict.get(keys[i])
-		
-		var tempo_node_instance = tempo_list_preload.instantiate()
-		
-		tempo_node_instance.time = dict_time
-		tempo_node_instance.tempo = dict_tempo
-		tempo_node_instance.host = self
-		get_node("UI/Charting Tabs/Tempo/ScrollContainer/VBoxContainer").add_child(tempo_node_instance)
-		
-		tempo_list.append(tempo_node_instance)
-
-
-func delete_tempo_at(time: float):
-	
-	chart.chart_data.tempos.erase(time)
-
-
-func _on_add_tempo_pressed():
-	
-	var time_add = $"UI/Charting Tabs/Tempo/Time Edit".text.to_float()
-	var tempo_add = $"UI/Charting Tabs/Tempo/Tempo Edit".text.to_float()
-	
-	var tempo_dict = chart.get_tempos_data()
-	tempo_dict.merge({time_add: tempo_add}, true)
-	
-	update_tempo_list()
-	
-	$"UI/Charting Tabs/Tempo/Time Edit".text = ""
-	$"UI/Charting Tabs/Tempo/Tempo Edit".text = ""
+func delete_tempo_at(time: float): chart.chart_data.tempos.erase(time)
 
 
 # Meter List Shit
 
-
-func _on_add_meter_pressed():
-	
-	var time_add = $"UI/Charting Tabs/Meter/Time Edit".text.to_float()
-	var raw_meter_string = $"UI/Charting Tabs/Meter/Beat Edit".text.split("/")
-	
-	var beats_int = raw_meter_string[0].to_int()
-	var steps_int = raw_meter_string[1].to_int()
-	
-	var meter_add = [beats_int, steps_int]
-	
-	var meter_dict = chart.get_meters_data()
-	meter_dict.merge({time_add: meter_add}, true)
-	
-	update_meter_list()
-	
-	$"UI/Charting Tabs/Meter/Time Edit".text = ""
-	$"UI/Charting Tabs/Meter/Beat Edit".text = ""
-
-
-func update_meter_list():
-	
-	
-	# Clear List
-	
-	for i in meter_list.size():
-		
-		meter_list[0].queue_free()
-		meter_list.remove_at(0)
-	
-	var meter_dict = chart.get_meters_data()
-	var keys = meter_dict.keys()
-	
-	
-	for i in keys.size():
-		
-		var dict_time = keys[i]
-		var dict_beats = meter_dict.get(keys[i])[0]
-		var dict_steps = meter_dict.get(keys[i])[1]
-		
-		var meter_node_instance = meter_list_preload.instantiate()
-		
-		meter_node_instance.time = dict_time
-		meter_node_instance.beats = dict_beats
-		meter_node_instance.steps = dict_steps
-		meter_node_instance.host = self
-		$"UI/Charting Tabs/Meter/ScrollContainer/VBoxContainer".add_child(meter_node_instance)
-		
-		meter_list.append(meter_node_instance)
-
-
-func delete_meter_at(time: float):
-	
-	chart.chart_data.meters.erase(time)
+func delete_meter_at(time: float): chart.chart_data.meters.erase(time)
 
 
 # Grid Stuff
 
 
+@warning_ignore("shadowed_variable")
 func snap_to_grid(pos: Vector2, grid: Vector2 = Vector2(8, 8), offset: Vector2 = Vector2(0, 0)) -> Vector2:
 	
-	pos.x = int( ( pos.x + offset.x ) / grid.x)
-	pos.y = int( ( pos.y + offset.y ) / grid.y)
+	pos.x = int( ( pos.x + offset.x ) / grid.x )
+	pos.y = int( ( pos.y + offset.y ) / grid.y )
 	
 	return pos
 
+
 func _draw():
 	
-	var grid_scale = ( 16.0 / ( get_meter_at( $Music/Instrumental.get_playback_position() )[1] ) )
+	var grid_scale = ( 16.0 / ( %Conductor.steps_per_measure ) )
 	var scaler = chart_grid * chart_zoom * Vector2( grid_scale, grid_scale * ( 4.0 / chart_snap ) )
-	var offset = Vector2( scaler.x / ( 1 + ( ( strum_count + 1 ) % 2 ) ), -scaler.y / chart_zoom.y )
+	var meter_multi = %Conductor.steps_per_measure / %Conductor.beats_per_measure
 	
-	draw_rect( Rect2( snap_to_grid(get_global_mouse_position(), scaler, offset ) * scaler - offset, scaler ), highlight_color )
+	var rectangle_position = grid_position_to_time( get_global_mouse_position() )
+	
+	var lane = rectangle_position.x
+	var time = rectangle_position.y + chart.offset
+	
+	rectangle_position.x = ( ( strum_count * scaler.x ) * -0.5 ) + ( lane * ( scaler.x ) ) + 640
+	rectangle_position.y = 64 + ( ( chart_grid.y * chart_zoom.y * meter_multi * grid_scale ) * ( time / %Conductor.seconds_per_beat ) ) 
+	
+	if ( ( lane >= -1 ) && ( lane < strum_count ) ): draw_rect( Rect2( rectangle_position, scaler ), highlight_color )
 
 
+@warning_ignore("shadowed_variable")
 func get_grid_position( pos: Vector2, offset: Vector2 = Vector2(0, 0) ) -> Vector2:
 	
-	var grid_scale = ( 16.0 / ( get_meter_at( $Music/Instrumental.get_playback_position() )[1] ) )
+	var grid_scale = ( 16.0 / ( get_meter_at( $Music/Instrumental.get_playback_position() )[2] ) )
 	
 	var scaler = chart_grid * chart_zoom * Vector2( grid_scale, grid_scale * ( 4.0 / chart_snap ) )
 	
@@ -576,41 +555,103 @@ func get_grid_position( pos: Vector2, offset: Vector2 = Vector2(0, 0) ) -> Vecto
 	
 	return Vector2( grid_position.x, grid_position.y )
 
+#
+## Chart Rendering
+#
 
-# Chart Rendering
-
-
-func chart_render(_delta: float):
+func render_chart():
 	
-	%Grid.columns = strum_count + 1
+	%Grid.columns = strum_count
 	
 	var song_position = $Music/Instrumental.get_playback_position()
+	var meter = get_meter_at( song_position )
 	
 	%Grid.position.x = 0
 	
+	%Grid.rows = meter[2] 
 	
-	%Grid.rows = get_meter_at( song_position )[1] 
+	var grid_scale = ( 16.0 / meter[2] )
+	var scaler: float = chart_grid.y * chart_zoom.y * grid_scale
 	
-	var grid_scale = ( 16.0 / get_meter_at( song_position )[1] )
-	
-	$ParallaxBackground/ParallaxLayer.motion_mirroring = Vector2(0, chart_grid.y * %Grid.rows * chart_zoom.y * grid_scale)
+	$ParallaxBackground/ParallaxLayer.motion_mirroring = Vector2( 0, scaler * %Grid.rows )
 	%Grid.zoom = Vector2( grid_scale, grid_scale ) * chart_zoom
 	
 	var grid_height = %Grid/TextureRect.size.y * %Grid/TextureRect.scale.y
 	
-	$ParallaxBackground/ParallaxLayer/Grid/ColorRect.size = Vector2( %Grid/TextureRect.size.x * %Grid/TextureRect.scale.x, grid_scale * chart_zoom.y * chart_grid.y )
-	$ParallaxBackground/ParallaxLayer/Grid/ColorRect.position = %Grid/TextureRect.position
+	var seconds_per_beat = 60.0 / get_tempo_at( song_position )[1]
+	var speed = ( grid_height / ( seconds_per_beat * meter[1] ) )
 	
-	var seconds_per_beat = 60.0 / get_tempo_at( song_position )
-	var speed = ( grid_height / ( seconds_per_beat * get_meter_at( song_position )[0] ) )
+	#
+	## Divider placement
+	#
+	
+	for i in divider_instances.size():
+		
+		divider_instances[0].queue_free()
+		divider_instances.remove_at(0)
 	
 	
-	$"Chart Editor UI/Song Pos Marker".size.x = %Grid/TextureRect.size.x * %Grid/TextureRect.scale.x * 1.1
-	$"Chart Editor UI/Song Pos Marker".position.x = $"Chart Editor UI/Song Pos Marker".size.x * -0.5
-	$"Chart Editor UI/Song Pos Marker".position.y = %Grid.position.y - ($"Chart Editor UI/Song Pos Marker".size.y * 0.5)
-	$"Chart Editor UI/Song Pos Marker".position.y += ( speed * song_position )
+	# Disabled highlights
+	for lane in lanes_disabled:
+		
+		var divider_instance = divider_preload.instantiate()
+		
+		var gridspace_length = %Grid/TextureRect.size.x * %Grid/TextureRect.scale.x / strum_count
+		
+		divider_instance.size.x = gridspace_length
+		divider_instance.size.y = %Grid/TextureRect.size.y * %Grid/TextureRect.scale.y
+		divider_instance.color = Color(0.075, 0.075, 0.075, 0.5)
+		
+		divider_instance.position.x = %Grid/TextureRect.position.x + ( gridspace_length * lane )
+		
+		%Grid.add_child( divider_instance )
+		divider_instances.append( divider_instance )
 	
-	if follow_marker: $Camera2D.position.y = (720 / 2) + %Grid.position.y + ( speed * song_position )
+	
+	# Horizontal Dividers
+	for i in meter[1]:
+		
+		var divider_instance = divider_preload.instantiate()
+		
+		var meter_multi = meter[2] / meter[1]
+		
+		divider_instance.size.x = %Grid/TextureRect.size.x * %Grid/TextureRect.scale.x
+		
+		if i == 0: divider_instance.size.y = 4
+		else: divider_instance.size.y = 2
+		
+		divider_instance.position.x = %Grid/TextureRect.position.x
+		divider_instance.position.y = %Grid/TextureRect.position.y + ( scaler * i * meter_multi )
+		divider_instance.position.y -= divider_instance.size.y / 2
+		
+		%Grid.add_child( divider_instance )
+		divider_instances.append( divider_instance )
+	
+	
+	# Vertical Dividers
+	for i in ( strum_count / 4 ) + 1:
+		
+		var divider_instance = divider_preload.instantiate()
+		
+		var gridspace_length = %Grid/TextureRect.size.x * %Grid/TextureRect.scale.x / strum_count
+		
+		divider_instance.size.x = 2
+		divider_instance.size.y = %Grid/TextureRect.size.y * %Grid/TextureRect.scale.y
+		
+		divider_instance.position.x = %Grid/TextureRect.position.x + ( gridspace_length * 4 * i )
+		divider_instance.position.x -= divider_instance.size.x / 2.0
+		
+		%Grid.add_child( divider_instance )
+		divider_instances.append( divider_instance )
+	
+	
+	%"Song Pos Marker".size.x = %Grid/TextureRect.size.x * %Grid/TextureRect.scale.x * 1.1
+	%"Song Pos Marker".position.x = %"Song Pos Marker".size.x * -0.5
+	
+	%"Song Pos Marker".position.y = %Grid.position.y - ( %"Song Pos Marker".size.y * 0.5 )
+	%"Song Pos Marker".position.y += ( speed * song_position )
+	
+	if follow_marker: $Camera2D.position.y = 360 + %Grid.position.y + ( speed * song_position )
 
 
 func update_measure_markers():
@@ -620,9 +661,109 @@ func update_measure_markers():
 		measure_marker_list[0].queue_free()
 		measure_marker_list.remove_at(0)
 
-
+#
 # Utilities
+#
 
+## Loads chart file
+func load_file( path: String ):
+	
+	chart = load( path )
+	events_dict = {}
+	
+	$Music/Vocals.stream = read_audio_file(chart.vocals)
+	$Music/Instrumental.stream = read_audio_file(chart.instrumental)
+	
+	$Conductor.tempo = chart.get_tempos_data().get(0.0)
+	
+	$Conductor.beats_per_measure = chart.get_meters_data().get(0.0)[0]
+	$Conductor.steps_per_measure = chart.get_meters_data().get(0.0)[1]
+	
+	$Music/Vocals.play()
+	$Music/Instrumental.play()
+	
+	%"Pause Button".button_pressed = $Music/Instrumental.stream_paused
+	
+	if( $Music/Vocals.stream != null ): vocals_length = $Music/Vocals.stream.get_length()
+	
+	instrumental_length = $Music/Instrumental.stream.get_length()
+	
+	offset = chart.offset
+	$Conductor.offset = chart.offset
+	
+	chart.chart_data.notes.sort_custom(sort_ascending)
+	chart.chart_data.events.sort_custom(sort_ascending)
+	
+	render_events()
+	render_tempo_markers()
+
+
+func sort_ascending( a, b ):
+	
+	if a[0] < b[0]: return true
+	return false
+
+## Binary Searches of notes and events
+func bsearch_left_range( value_set: Array, length: int, left_range: float ) -> int:
+	
+	if ( length == 0 ): return -1
+	if ( value_set[ length - 1 ][0] < left_range ): return -1
+	
+	var low: int = 0
+	var high: int = length - 1
+	
+	while ( low <= high ):
+		
+		@warning_ignore("integer_division")
+		var mid: int = low + ( ( high - low ) / 2 )
+		
+		if ( value_set[mid][0] >= left_range ): high = mid - 1
+		else: low = mid + 1
+	
+	return high + 1
+
+
+func bsearch_right_range( value_set: Array, length: int, right_range: float ) -> int:
+	
+	if ( length == 0 ): return -1
+	if ( value_set[0][0] > right_range ): return -1
+	
+	var low: int = 0
+	var high: int = length - 1
+	
+	while ( low <= high ):
+		
+		@warning_ignore("integer_division")
+		var mid: int = low + ( ( high - low ) / 2 )
+		
+		if ( value_set[mid][0] > right_range ): high = mid - 1
+		else: low = mid + 1
+	
+	return low - 1
+
+
+## Updates song metadata
+@warning_ignore("shadowed_variable")
+func set_metadata( artist: String, song_title: String, song_difficulty: String, offset: float, scroll_speed: float ):
+	
+	chart.artist = artist
+	chart.song_title = song_title
+	chart.difficulty = song_difficulty
+	
+	chart.offset = offset
+	self.offset = offset
+	chart.scroll_speed = scroll_speed
+	
+	can_chart = true
+
+@warning_ignore("shadowed_variable")
+func set_tempo_list( tempo_list: Dictionary ):
+	
+	chart.chart_data.tempos.merge( tempo_list, true )
+	render_tempo_markers()
+
+@warning_ignore("shadowed_variable")
+func set_meter_list( meter_list: Dictionary ): chart.chart_data.meters.merge( meter_list, true )
 
 ## Converts a float of seconds into a time format of MM:SS.mmm
 func float_to_time(time: float) -> String:
@@ -639,18 +780,18 @@ func float_to_time(time: float) -> String:
 
 
 ##  Gets the tempo at a certain time in seconds
-func get_tempo_at(time: float) -> float:
+func get_tempo_at(time: float) -> Array:
 	
 	var tempo_dict = chart.get_tempos_data()
 	var keys = tempo_dict.keys()
 	
-	var tempo_output = 0.0
+	var tempo_output = [ 0.0, 0.0 ]  
 	
 	for i in keys.size():
+		
 		var dict_time = keys[i]
 		
-		if time >= dict_time:
-			tempo_output = tempo_dict.get(keys[i])
+		if time >= dict_time: tempo_output = [ dict_time, tempo_dict.get(keys[i]) ]
 	
 	return tempo_output
 
@@ -661,22 +802,24 @@ func get_meter_at(time: float) -> Array:
 	var meter_dict = chart.get_meters_data()
 	var keys = meter_dict.keys()
 	
-	var meter_output = [1, 1]
+	var meter_output = [ 0.0, 1, 1 ]
 	
 	for i in keys.size():
 		var dict_time = keys[i]
 		
 		if time >= dict_time:
-			meter_output[0] = meter_dict.get(keys[i])[0]
-			meter_output[1] = meter_dict.get(keys[i])[1]
-		else:
-			break
+			
+			meter_output[0] = dict_time
+			meter_output[1] = meter_dict.get(keys[i])[0]
+			meter_output[2] = meter_dict.get(keys[i])[1]
+		
+		else: break
 	
 	return meter_output
 
 
 ## Returns the measure at a certain time
-func get_measure_at(time: float, song_length: float) -> int:
+func get_measure_at(time: float, _song_length: float) -> int:
 	
 	var measure = 0
 	
@@ -685,12 +828,10 @@ func get_measure_at(time: float, song_length: float) -> int:
 	var keys = meter_dict.keys()
 	
 	for i in keys.size():
+		
 		var dict_time = keys[i]
 		
-		
-		if dict_time > time:
-			break
-		
+		if dict_time > time: break
 		
 		var tempo_at = get_tempo_at(dict_time)
 		var meter_at = get_meter_at(dict_time)
@@ -703,9 +844,7 @@ func get_measure_at(time: float, song_length: float) -> int:
 		
 		measure_add = int( time_temp / seconds_per_measure )
 		
-		var clamp = clamp(i + 1, 0, keys.size() - 1)
-		
-		time_temp -= keys[clamp]
+		time_temp -= keys[ clamp( i + 1, 0, keys.size() - 1 ) ]
 		measure += measure_add
 		
 	
@@ -718,19 +857,23 @@ func _on_set_difficulty_pressed(): chart.difficulty = $"UI/Charting Tabs/Chart/D
 func _on_set_scroll_speed_pressed(): chart.scroll_speed = $"UI/Charting Tabs/Chart/Scroll Speed".text.to_float()
 
 func _on_offset_button_pressed():
+	
 	chart.offset = $"UI/Charting Tabs/Chart/Offset".text.to_float()
 	offset = chart.offset
 	$Conductor.offset = chart.offset
 	render_notes()
 	render_events()
 
+
 func _on_set_strum_pressed(): 
+	
 	strum_count = $"UI/Charting Tabs/Chart/Strum Text".text.to_int()
 	render_notes()
 	render_events()
 
-
+#
 # Chart Rendering Fuckery
+#
 
 func render_notes( song_time = $Music/Instrumental.get_playback_position() ):
 	
@@ -739,55 +882,73 @@ func render_notes( song_time = $Music/Instrumental.get_playback_position() ):
 		note_instances[0].queue_free()
 		note_instances.remove_at(0)
 	
-	var index = 0
+	# Getting tempo and media data
+	var tempo_data = get_tempo_at(song_time)
+	var tempo = tempo_data[1]
+	var meter = get_meter_at(song_time)
 	
-	for i in chart.get_note_data():
-		
-		var time = i[0]
-		var lane = i[1]
-		var note_length = i[2]
-		var note_type = i[3]
-		
-		
-		var seconds_per_beat = 60.0 / get_tempo_at(time)
-		var meter_multi = get_meter_at(time)[1] / get_meter_at(time)[0]
-		var grid_scale = ( 16.0 / get_meter_at( time )[1] )
-		
-		var scaler = chart_grid * chart_zoom * Vector2(grid_scale, grid_scale)
-		var range = seconds_per_beat * get_meter_at(time)[0]
-		
-		if time > (song_time + range * 2):
-			index += 1
-			continue
-		
-		
-		if ( get_tempo_at(time) == get_tempo_at(song_time) ) && ( time >= (song_time - range) && time <= (song_time + range * 2) ):
-			
-			var chart_arrow_instance = chart_arrow_preload.instantiate()
-			
-			var arrow_x = ( ( strum_count * scaler.x ) * -0.5 + ( scaler.x ) ) + ( lane * ( scaler.x ) )
-			var arrow_y = -296 + ( chart_grid.y * grid_scale / 2 ) + ( ( chart_grid.y * chart_zoom.y * meter_multi * grid_scale ) * ( ( time + offset ) / seconds_per_beat ) )
-			
-			chart_arrow_instance.position = Vector2(arrow_x, arrow_y)
-			chart_arrow_instance.direction = int(lane) % 4
-			chart_arrow_instance.length = note_length
-			chart_arrow_instance.scale = ( chart_grid * grid_scale ) / Vector2(64, 64)
-			chart_arrow_instance.color.h = 1 - 0.1 * note_type
-			chart_arrow_instance.zoom = chart_zoom
-			
-			if selected_note.has(index):
-				chart_arrow_instance.selected = true
-			
-			chart_arrow_instance.time = time
-			chart_arrow_instance.tempo = get_tempo_at(time)
-			chart_arrow_instance.meter = get_meter_at(time)
-			
-			note_instances.append( chart_arrow_instance )
-			
-			
-			$"Chart Editor UI".add_child( chart_arrow_instance )
-		
-		index += 1
+	var seconds_per_beat = 60.0 / tempo
+	
+	var note_data = chart.get_note_data()
+	
+	# Searching for notes within the given range
+	@warning_ignore("shadowed_global_identifier")
+	var range = seconds_per_beat * meter[1] * ( 1.0 / chart_zoom.y )
+	var index_left = bsearch_left_range( note_data, note_data.size(), song_time - range * 4 )
+	var index_right = bsearch_right_range( note_data, note_data.size(), song_time + range * 4 )
+	
+	if ( index_left == -1 ) || ( index_right == -1 ): return
+	
+	for index in range( index_left, index_right + 1 ): render_note(index)
+
+
+func render_note( index: int ) :
+	
+	# Grabbing note data
+	var note = chart.get_note_data()[index]
+	
+	var time = note[0]
+	var lane = note[1]
+	var note_length = note[2]
+	var note_type = note[3]
+	
+	if lanes_disabled.has(lane): return
+	
+	var tempo_data = get_tempo_at(time)
+	var tempo = tempo_data[1]
+	var meter = get_meter_at(time)
+	
+	var seconds_per_beat = 60.0 / tempo
+	# Adjusts the position to the grid
+	var meter_multi = meter[2] / meter[1]
+	var grid_scale = ( 16.0 / meter[2] )
+	
+	# Scales the grid with the zoom and and grid scale
+	var scaler = chart_grid * chart_zoom * Vector2( grid_scale, grid_scale )
+	
+	var chart_arrow_instance = chart_arrow_preload.instantiate()
+	
+	# var arrow_x = ( ( strum_count * scaler.x ) * -0.5 + ( scaler.x ) ) + ( lane * ( scaler.x ) )
+	var arrow_x = ( ( strum_count * scaler.x ) * -0.5 + ( scaler.x / 2.0 ) ) + ( lane * ( scaler.x ) )
+	var arrow_y = -296 + ( chart_grid.y * grid_scale / 2 ) + ( ( chart_grid.y * chart_zoom.y * meter_multi * grid_scale ) * ( ( time + offset ) / seconds_per_beat ) )
+	
+	chart_arrow_instance.position = Vector2( arrow_x, arrow_y )
+	chart_arrow_instance.direction = int(lane) % 4
+	chart_arrow_instance.length = note_length
+	chart_arrow_instance.lane = lane
+	chart_arrow_instance.scale = ( chart_grid * grid_scale ) / Vector2(64, 64)
+	chart_arrow_instance.color.h = 1 - 0.1 * note_type
+	chart_arrow_instance.zoom = chart_zoom
+	
+	chart_arrow_instance.selected = selected_note.has(index)
+	
+	chart_arrow_instance.time = time
+	chart_arrow_instance.tempo = tempo
+	chart_arrow_instance.meter = [ meter[1], meter[2] ]
+	
+	note_instances.append( chart_arrow_instance )
+	
+	$"Chart Editor UI".add_child( chart_arrow_instance )
 
 
 func check_notes( song_time = $Music/Instrumental.get_playback_position() ):
@@ -796,14 +957,15 @@ func check_notes( song_time = $Music/Instrumental.get_playback_position() ):
 	for i in note_instances:
 		
 		if (i.time < song_time):
+			
 			i.modulate = Color(1, 1, 1, 0.5)
 			
 			if !passed_note_instances.has( i.time ):
 				
 				passed_note_instances.append( i.time )
 				%"Hit Sound".play()
-		else:
-			i.modulate = Color(1, 1, 1, 1)
+		
+		else: i.modulate = Color(1, 1, 1, 1)
 
 
 func render_events( song_time = $Music/Instrumental.get_playback_position() ):
@@ -813,135 +975,196 @@ func render_events( song_time = $Music/Instrumental.get_playback_position() ):
 		event_instances[0].queue_free()
 		event_instances.remove_at(0)
 	
-	var events_list = []
+	events_dict = {}
 	
+	var tempo_data = get_tempo_at(song_time)
+	var tempo = tempo_data[1]
+	var meter = get_meter_at(song_time)
 	
-	for i in chart.get_events_data():
+	var seconds_per_beat = 60.0 / tempo
+	
+	var events_data = chart.get_events_data()
+	
+	@warning_ignore("shadowed_global_identifier")
+	var range = seconds_per_beat * meter[1] * ( 1.0 / chart_zoom.y )
+	var index_left = bsearch_left_range( events_data, events_data.size(), song_time - range )
+	var index_right = bsearch_right_range( events_data, events_data.size(), song_time + range * 3 )
+	
+	if index_left == -1: return
+	
+	for index in range( index_left, index_right + 1 ):
 		
-		var time = i[0]
-		var event_name = i[1]
-		var parameters = i[2]
-		var lane = 0
+		var event = events_data[index]
+		var time = event[0]
 		
-		var seconds_per_beat = 60.0 / get_tempo_at(time)
-		var meter_multi = get_meter_at(time)[1] / get_meter_at(time)[0]
-		var grid_scale = ( 16.0 / get_meter_at( time )[1] )
+		if !events_dict.has( time ): events_dict.merge( { time: 1 } )
+		else: continue
 		
-		var scaler = chart_grid * chart_zoom * Vector2(grid_scale, grid_scale)
-		var range = seconds_per_beat * get_meter_at(time)[0]
+		render_event( index )
+
+
+func render_event( index: int ):
+	
+	var event = chart.get_events_data()[index]
+	var time = event[0]
+	var lane = 0
+	
+	if lanes_disabled.has(lane): return
+	
+	var tempo_data = get_tempo_at(time)
+	var tempo = tempo_data[1]
+	var meter = get_meter_at(time)
+	
+	var seconds_per_beat = 60.0 / tempo
+	# Adjusts the position to the grid
+	var meter_multi = meter[2] / meter[1]
+	var grid_scale = ( 16.0 / meter[2] )
+	
+	# Scales the grid with the zoom and and grid scale
+	var scaler = chart_grid * chart_zoom * Vector2( grid_scale, grid_scale )
+	
+	var event_instance = event_preload.instantiate()
+	
+	var arrow_x = ( ( strum_count * scaler.x ) * -0.5 + -( scaler.x / 2.0 ) ) + ( lane * ( scaler.x ) )
+	var arrow_y = -296 + ( chart_grid.y * grid_scale / 2 ) + ( ( scaler.y * meter_multi ) * ( ( time + offset ) / seconds_per_beat ) )
+	
+	event_instance.position = Vector2( arrow_x, arrow_y )
+	event_instance.scale = ( chart_grid * grid_scale ) / Vector2( 64, 64 )
+	
+	event_instance.color = Color( 0.494, 0.369, 1 )
+	event_instance.zoom = chart_zoom
+	
+	event_instances.append( event_instance )
+	$"Chart Editor UI".add_child( event_instance )
+
+
+func render_tempo_markers():
+	
+	for i in tempo_marker_instances.size():
 		
-		if time > (song_time + range * 2):
-			continue
+		tempo_marker_instances[0].queue_free()
+		tempo_marker_instances.remove_at(0)
+	
+	for time in chart.get_tempos_data().keys():
 		
-		if ( ( get_tempo_at(time) == get_tempo_at(song_time) ) && ( time >= (song_time - range) && time <= (song_time + range * 2) ) ): 
-			
-			var event_instance = event_preload.instantiate()
-			
-			var arrow_x = ( ( strum_count * scaler.x ) * -0.5 ) + ( lane * ( scaler.x ) )
-			var arrow_y = -296 + ( chart_grid.y * grid_scale / 2 ) + ( ( scaler.y * meter_multi ) * ( ( time + offset ) / seconds_per_beat ) )
-			
-			event_instance.position = Vector2(arrow_x, arrow_y)
-			event_instance.scale = ( chart_grid * grid_scale ) / Vector2(64, 64)
-			
-			if !events_list.has(event_name):
-				events_list.append(event_name)
-			
-			event_instance.color.h = 1 - 0.1 * events_list.find(event_name)
-			event_instance.zoom = chart_zoom
-			event_instance.event_name = event_name
-			event_instance.parameters = parameters
-			event_instance.offset.x = ( -256 * events_list.find(event_name) / 2 )
-			
-			event_instances.append( event_instance )
-			$"Chart Editor UI".add_child( event_instance )
+		var tempo = get_tempo_at(time)[1]
+		var meter = get_meter_at(time)
+		
+		var seconds_per_beat = 60.0 / tempo
+		var meter_multi = meter[2] / meter[1]
+		var grid_scale = ( 16.0 / meter[2] )
+		
+		var scaler = chart_grid * chart_zoom * Vector2( grid_scale, grid_scale )
+		
+		var x = ( ( strum_count * scaler.x ) * -0.5 ) + ( ( strum_count ) * ( scaler.x ) ) + 2
+		var y = -296 + ( ( scaler.y * meter_multi ) * ( ( time + offset ) / seconds_per_beat ) )
+		
+		var tempo_marker_instance = tempo_marker_preload.instantiate()
+		
+		tempo_marker_instance.position = Vector2( x, y )
+		tempo_marker_instance.scale = ( chart_grid * chart_zoom * Vector2( grid_scale, grid_scale ) ) / Vector2( 32.0, 32.0 )
+		tempo_marker_instance.tempo = tempo
+		
+		tempo_marker_instances.append(tempo_marker_instance)
+		$"Chart Editor UI".add_child(tempo_marker_instance)
+	
+	can_chart = true
+
+
+# Grid Coniditonals
 
 
 func is_slot_filled(time: float, lane: int) -> bool:
 	
-	var output = false
-	
 	for i in chart.get_note_data():
 		
-		if ( !is_equal_approx(i[0], time) ) || ( i[1] != lane ):
-			continue
-		elif ( is_equal_approx(i[0], time) ) || ( i[1] == lane ):
-			output = true
-			i[0] = time
-			break
+		if ( !is_equal_approx(i[0], time) ) || ( i[1] != lane ): continue
 		
+		elif ( is_equal_approx(i[0], time) ) || ( i[1] == lane ):
+			
+			i[0] = time
+			return true
 	
-	return output
+	return false
+
 
 func is_slot_filled_event(time: float) -> bool:
 	
-	var output = false
-	
 	for i in chart.get_events_data():
 		
-		if ( !is_equal_approx(i[0], time ) ):
-			continue
-		elif ( is_equal_approx(i[0], time ) ):
-			output = true
-			i[0] = time
-			break
+		if ( !is_equal_approx(i[0], time ) ): continue
 		
+		elif ( is_equal_approx(i[0], time ) ):
+			
+			i[0] = time
+			return true
 	
-	return output
+	return false
 
 
 func grid_position_to_time(pos: Vector2) -> Vector2:
 	
-	var seconds_per_beat = 60.0 / $Conductor.tempo
-	var meter_multi = $Conductor.steps_per_measure / $Conductor.beats_per_measure
-	var grid_scale = ( 16.0 / $Conductor.steps_per_measure )
+	var seconds_per_beat: float = 60.0 / $Conductor.tempo
+	var meter: Array = [ $Conductor.beats_per_measure, $Conductor.steps_per_measure ]
 	
-	var scaler = chart_grid * chart_zoom * Vector2(grid_scale, grid_scale)
+	var meter_multi: float = meter[1] / meter[0]
+	var grid_scale: float = ( 16.0 / meter[1] )
 	
-	var snap_scale = ( 16.0 / ( get_meter_at( $Music/Instrumental.get_playback_position() )[0] * chart_snap ) )
+	var scaler: Vector2 = chart_grid * chart_zoom * Vector2( grid_scale, grid_scale )
 	
-	var lane = get_grid_position( pos, Vector2( scaler.x / ( 1 + ( ( strum_count + 1 ) % 2 ) ) , 0) ).x
-	var note = get_grid_position( pos ).y * ( chart_snap / 4.0 )
+	var _snap_scale: float = ( 16.0 / ( meter[1] * chart_snap ) )
 	
-	var time = ( ( ( scaler.y * meter_multi ) / chart_snap ) * note ) / scaler.y * ( seconds_per_beat / chart_snap ) - offset
+	@warning_ignore("narrowing_conversion")
+	var lane: int = get_grid_position( pos, Vector2( scaler.x / ( 1 + ( ( strum_count ) % 2 ) ) , 0 ) ).x
+	var note: float = get_grid_position( pos ).y * ( chart_snap / 4.0 )
+	
+	var time: float = ( ( ( scaler.y * meter_multi ) / chart_snap ) * note ) / scaler.y * ( seconds_per_beat / chart_snap ) - offset
 	
 	return Vector2( lane, time )
 
 
-func find_note(time: float, lane: int) -> int:
+func find_note( time: float, lane: int ) -> int:
 	
-	var output = -1
-	var index = 0
+	var note_data = chart.get_note_data()
+	var index_left: int = bsearch_left_range( note_data, note_data.size(), time )
+	var index_right: int = bsearch_right_range( note_data, note_data.size(), time )
 	
-	for i in chart.get_note_data():
+	for i in range( index_left, index_right + 1 ):
 		
-		if ( !is_equal_approx(i[0], time) ) || ( i[1] != lane ):
-			index += 1
-			continue
-		elif ( is_equal_approx(i[0], time) ) || ( i[1] == lane ):
-			output = index
-			i[0] = time
-			break
+		if note_data[i][1] == lane:
+			
+			return i
+	
+	return -1
+
+
+func find_event( time: float, event_name: String ) -> int:
+	
+	var event_data = chart.get_events_data()
+	var index_left: int = bsearch_left_range( event_data, event_data.size(), time )
+	var index_right: int = bsearch_right_range( event_data, event_data.size(), time )
+	
+	for i in range( index_left, index_right + 1 ):
 		
+		if event_data[i][1] == event_name:
+			
+			return i
+	
+	return -1
+
+
+func find_events( time: float ) -> Array:
+	
+	var output = []
+	
+	var event_data = chart.get_events_data()
+	var index_left: int = bsearch_left_range( event_data, event_data.size(), time )
+	var index_right: int = bsearch_right_range( event_data, event_data.size(), time )
+	
+	for i in range( index_left, index_right + 1 ): output.append(event_data[i])
 	
 	return output
 
-func find_event(time: float) -> int:
-	
-	var output = -1
-	var index = 0
-	
-	for i in chart.get_events_data():
-		
-		if ( !is_equal_approx(i[0], time) ):
-			index += 1
-			continue
-		elif ( is_equal_approx(i[0], time) ):
-			output = index
-			i[0] = time
-			break
-		
-	
-	return output
 
 func count_events(time: float) -> int:
 	
@@ -949,18 +1172,19 @@ func count_events(time: float) -> int:
 	
 	for i in chart.get_events_data():
 		
-		if ( !is_equal_approx(i[0], time) ):
-			continue
+		if ( !is_equal_approx(i[0], time) ): continue
+		
 		elif ( is_equal_approx(i[0], time) ):
-			output += 1
+			
+			output = 1 if output == -1 else output + 1
 			i[0] = time
 		
 	
 	return output
 
+
 func find_last_event(time: float) -> int:
 	
-	var output = -1
 	var index = chart.get_events_data().size() - 1
 	
 	var events_data = chart.get_events_data()
@@ -968,34 +1192,66 @@ func find_last_event(time: float) -> int:
 	
 	for i in events_data:
 		
-		if ( !is_equal_approx(i[0], time) ):
+		if ( !is_equal_approx(i[0], time ) ):
+			
 			index -= 1
 			continue
-		elif ( is_equal_approx(i[0], time) ):
-			output = index
+		
+		elif ( is_equal_approx(i[0], time ) ):
+			
 			i[0] = time
 			print(index)
-			break
+			return index
 		
 	
-	return output
+	return -1
 
 
-func _on_note_length_value_changed(value):
+func popup_event_editor( time: float ):
 	
-	brush_note_length = value
-
-func _on_note_type_value_changed(value):
+	var event_editor_popup_instance = event_editor_popup_preload.instantiate()
 	
-	brush_note_type = value
-
-func _on_event_name_text_changed(new_text):
+	event_editor_popup_instance.events = find_events( time )
+	event_editor_popup_instance.time = time
 	
-	brush_event_name = new_text
-
-func _on_event_parameters_text_changed():
+	add_child(event_editor_popup_instance)
+	event_editor_popup_instance.popup()
 	
-	brush_event_parameters = $"UI/Brush Settings/Event Brush/Event Parameters".text
+	event_editor_popup_instance.connect( "event_added", self.add_event )
+	event_editor_popup_instance.connect( "event_removed", self.remove_event )
+	event_editor_popup_instance.connect( "close_requested", self.close_popup )
+
+
+func add_event( event: Array ):
+	
+	chart.chart_data.events.append(event)
+	chart.chart_data.events.sort_custom(sort_ascending)
+	
+	can_chart = false
+	
+	popup_event_editor(event[0])
+	render_events()
+
+
+func remove_event( time: float, event_name: String ):
+	
+	chart.chart_data.events.remove_at( find_event( time, event_name ) )
+	
+	can_chart = false
+	
+	popup_event_editor(time)
+	render_events()
+
+
+func set_lanes_disabled( lanes: PackedInt32Array ):
+	
+	lanes_disabled = lanes
+	
+	render_chart()
+	render_notes()
+
+
+func _on_note_type_value_changed(value): brush_note_type = value
 
 
 func format_time(time: float, digits: int = 6) -> float:
@@ -1003,9 +1259,169 @@ func format_time(time: float, digits: int = 6) -> float:
 	var time_string = str(time)
 	var planes = time_string.split(".")
 	
-	if planes[0] == "0":
-		planes[0] = ""
+	if planes[0] == "0": planes[0] = ""
 	
 	var output = snapped( time, pow( 10, -( digits - planes[0].length() ) ) )  
 	
 	return output
+
+
+@warning_ignore("shadowed_variable")
+func _on_save_folder_dialog_dir_selected( path: String, chart: Chart ):
+	
+	ResourceSaver.save(chart, path)
+	load_file( path )
+
+#
+# Menu Bar Item Pressed
+#
+
+# file button item pressed
+func file_button_item_pressed(id):
+	
+	var item_name: String = %"File Button".get_popup().get_item_text(id)
+	
+	if item_name == "New File":
+		
+		can_chart = false
+		
+		var new_file_popup_instance = new_file_popup_preload.instantiate()
+		
+		add_child( new_file_popup_instance )
+		new_file_popup_instance.popup()
+		new_file_popup_instance.connect( "file_created", self._on_save_folder_dialog_dir_selected )
+		new_file_popup_instance.connect( "close_requested", self.close_popup )
+	
+	elif item_name == "Open File":
+		
+		can_chart = false
+		
+		var open_file_popup_instance = open_file_popup_preload.instantiate()
+		
+		add_child( open_file_popup_instance )
+		open_file_popup_instance.popup()
+		open_file_popup_instance.connect( "file_selected", self.load_file )
+		open_file_popup_instance.connect( "close_requested", self.close_popup )
+	
+	elif item_name == "Save File": ResourceSaver.save(chart, chart.resource_path)
+	
+	elif item_name == "Convert Chart File":
+		
+		can_chart = false
+		
+		var convert_chart_popup_instance = convert_chart_popup_preload.instantiate()
+		
+		add_child( convert_chart_popup_instance )
+		convert_chart_popup_instance.popup()
+		convert_chart_popup_instance.connect( "file_created", self._on_save_folder_dialog_dir_selected )
+		convert_chart_popup_instance.connect( "close_requested", self.close_popup )
+
+
+# edit button item pressed
+func edit_button_item_pressed(id):
+	
+	var item_name: String = %"Edit Button".get_popup().get_item_text(id)
+	
+	if item_name == "Edit Metadata":
+		
+		can_chart = false
+		
+		var edit_metadata_popup_instance = edit_metadata_popup_preload.instantiate()
+		
+		edit_metadata_popup_instance.artist = chart.artist
+		edit_metadata_popup_instance.song_title = chart.song_title
+		edit_metadata_popup_instance.song_difficulty = chart.difficulty
+		
+		edit_metadata_popup_instance.offset = chart.offset
+		edit_metadata_popup_instance.scroll_speed = chart.scroll_speed
+		
+		add_child(edit_metadata_popup_instance)
+		edit_metadata_popup_instance.popup()
+		edit_metadata_popup_instance.connect( "metadata_changed", self.set_metadata )
+		edit_metadata_popup_instance.connect( "close_requested", self.close_popup )
+	
+	elif item_name == "Edit Tempo Data":
+		
+		can_chart = false
+		
+		var timings_editor_popup_instance = timings_editor_popup_preload.instantiate()
+		
+		timings_editor_popup_instance.tempo_list = chart.get_tempos_data()
+		
+		add_child(timings_editor_popup_instance)
+		timings_editor_popup_instance.popup()
+		
+		timings_editor_popup_instance.connect( "timings_data_changed", self.set_tempo_list )
+		timings_editor_popup_instance.connect( "close_requested", self.close_popup )
+	
+	elif item_name == "Edit Meter Data":
+		
+		can_chart = false
+		
+		var meter_editor_popup_instance = meter_editor_popup_preload.instantiate()
+		
+		meter_editor_popup_instance.meter_list = chart.get_meters_data()
+		
+		add_child(meter_editor_popup_instance)
+		meter_editor_popup_instance.popup()
+		
+		meter_editor_popup_instance.connect( "meter_data_changed", self.set_meter_list )
+		meter_editor_popup_instance.connect( "close_requested", self.close_popup )
+
+
+# edit button item pressed
+func audio_button_item_pressed(id):
+	
+	var item_name: String = %"Audio Button".get_popup().get_item_text(id)
+	
+	if item_name == "Beat Sounds":
+		
+		beat_sounds = !beat_sounds
+		%"Audio Button".get_popup().set_item_checked( id, beat_sounds )
+	
+	elif item_name == "Step Sounds":
+		
+		step_sounds = !step_sounds
+		%"Audio Button".get_popup().set_item_checked( id, step_sounds )
+	
+	elif item_name == "Hit Sounds":
+		pass
+
+
+# strum button item pressed
+func strum_button_item_pressed(id):
+	
+	var item_name: String = %"Strum Button".get_popup().get_item_text(id)
+	
+	if item_name == "Add Strumline":
+		
+		strum_count = clamp( strum_count + 4, 4, 16 )
+		
+		render_chart()
+		render_events()
+		render_notes()
+	
+	elif item_name == "Remove Strumline":
+		
+		strum_count = clamp( strum_count - 4, 4, 16 )
+		
+		render_chart()
+		render_events()
+		render_notes()
+	
+	elif item_name == "Toggle Strumlines":
+		
+		can_chart = false
+		
+		var toggle_strums_popup_instance = toggle_strums_popup_preload.instantiate()
+		
+		toggle_strums_popup_instance.strum_count = strum_count
+		toggle_strums_popup_instance.lanes_disabled = lanes_disabled
+		
+		add_child(toggle_strums_popup_instance)
+		toggle_strums_popup_instance.popup()
+		
+		toggle_strums_popup_instance.connect( "lanes_disbaled_changed", self.set_lanes_disabled )
+		toggle_strums_popup_instance.connect( "close_requested", self.close_popup )
+
+func close_popup(): can_chart = true

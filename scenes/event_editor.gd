@@ -134,10 +134,10 @@ func _process(delta):
 		chart_render(delta)
 		
 		check_notes( song_position )
-		
 	
 	
 	$"UI/Panel/Song Progress/Time Display Drag".visible = dragging_time
+	
 	
 	if dragging_time:
 		
@@ -151,15 +151,18 @@ func _process(delta):
 	$UI/Panel/ColorRect/ExtraLabel.text += "\n" + "Events List: " + str( events_list )
 	$UI/Panel/ColorRect/ExtraLabel.text += " • " + "Events Drawn: " + str(event_instances.size()) + "/" + str( chart.get_events_data().size() )
 	
+	
 	if Input.is_action_just_pressed("toggle_song"):
 		
 		$Music/Vocals.stream_paused = !$Music/Vocals.stream_paused
 		$Music/Instrumental.stream_paused = !$Music/Instrumental.stream_paused
 		$"UI/Panel/ColorRect/HBoxContainer/Pause Button".button_pressed = $Music/Instrumental.stream_paused
 	
+	
 	if Input.is_action_just_released("ui_cancel"):
 		
 		render_events()
+	
 	
 	if Input.is_action_just_released("debug"):
 		check_notes()
@@ -168,6 +171,7 @@ func _process(delta):
 	
 	if Input.is_action_just_pressed("mouse_left"):
 		
+		@warning_ignore("integer_division")
 		var lane = grid_position_to_time( get_global_mouse_position() ).x + ( strum_count / 2 ) - 1
 		var time = grid_position_to_time( get_global_mouse_position() ).y
 		
@@ -179,7 +183,7 @@ func _process(delta):
 			
 			if get_global_mouse_position().y >= 64 + camera_offset && get_global_mouse_position().y <= 640 + camera_offset:
 				
-				if is_slot_filled_event(time, lane):
+				if is_slot_filled_event( time, lane ):
 					
 					if pressing_ctrl:
 						
@@ -213,7 +217,7 @@ func _process(delta):
 				if is_slot_filled(time, lane):
 					
 					selected_note.appenprd( find_note(time, lane) )
-				
+	
 	
 	if Input.is_action_just_released("scroll_up"):
 		
@@ -236,6 +240,7 @@ func _process(delta):
 				
 				chart_render( delta )
 				render_events( song_position )
+	
 	
 	if Input.is_action_just_released("scroll_down"):
 		
@@ -288,10 +293,7 @@ func _on_conductor_new_beat(_current_beat, measure_relative):
 	tween.tween_property($Background/Background, "scale", Vector2(1, 1), 0.2).set_delay(0.0125)
 
 
-func _on_conductor_new_step(current_step, measure_relative):
-	
-	if step_sounds:
-		$"Conductor/Step Sound".play(0.56)
+func _on_conductor_new_step(_current_step, _measure_relative): if step_sounds: $"Conductor/Step Sound".play(0.56)
 
 
 func _on_beat_sounds_check_box_toggled(button_pressed): beat_sounds = button_pressed
@@ -504,6 +506,7 @@ func delete_meter_at(time: float):
 # Grid Stuff
 
 
+@warning_ignore("shadowed_variable")
 func snap_to_grid(pos: Vector2, grid: Vector2 = Vector2(8, 8), offset: Vector2 = Vector2(0, 0)) -> Vector2:
 	
 	pos.x = int( ( pos.x + offset.x ) / grid.x)
@@ -517,11 +520,13 @@ func _draw():
 	var grid_scale = ( 16.0 / ( get_meter_at( $Music/Instrumental.get_playback_position() )[1] ) )
 	var scaler = chart_grid * chart_zoom * Vector2( grid_scale, grid_scale * ( 4.0 / chart_snap ) )
 	# var offset = Vector2( scaler.x / ( 1 + ( ( strum_count + 1 ) % 2 ) ), -scaler.y / chart_zoom.y )
+	@warning_ignore("shadowed_variable")
 	var offset = Vector2(0, 0)
 	
 	draw_rect( Rect2( snap_to_grid(get_global_mouse_position(), scaler, offset ) * scaler - offset, scaler ), highlight_color )
 
 
+@warning_ignore("shadowed_variable")
 func get_grid_position( pos: Vector2, offset: Vector2 = Vector2(0, 0) ) -> Vector2:
 	
 	var grid_scale = ( 16.0 / ( get_meter_at( $Music/Instrumental.get_playback_position() )[1] ) )
@@ -569,7 +574,7 @@ func chart_render(_delta: float):
 	$"Chart Editor UI/Song Pos Marker".position.y = %Grid.position.y - ($"Chart Editor UI/Song Pos Marker".size.y * 0.5)
 	$"Chart Editor UI/Song Pos Marker".position.y += ( speed * song_position )
 	
-	if follow_marker: $Camera2D.position.y = (720 / 2) + %Grid.position.y + ( speed * song_position )
+	if follow_marker: $Camera2D.position.y = 360 + %Grid.position.y + ( speed * song_position )
 
 
 func update_measure_markers():

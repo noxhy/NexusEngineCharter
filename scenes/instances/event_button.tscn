@@ -1,0 +1,17 @@
+[gd_scene load_steps=2 format=3 uid="uid://dldu538oxtphi"]
+
+[ext_resource type="Script" path="res://scenes/instances/event_button.gd" id="1_tjyqi"]
+
+[node name="Event Button" type="Button"]
+custom_minimum_size = Vector2(312, 48)
+anchors_preset = 10
+anchor_right = 1.0
+offset_right = -1088.0
+offset_bottom = 48.0
+grow_horizontal = 2
+size_flags_horizontal = 4
+text = "Event Name"
+text_overrun_behavior = 3
+script = ExtResource("1_tjyqi")
+
+[connection signal="pressed" from="." to="." method="_on_pressed"]

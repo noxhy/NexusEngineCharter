@@ -442,6 +442,10 @@ func read_audio_file(path: String):
 		content = AudioStreamMP3.new()
 		content.data = file.get_buffer(file.get_length())
 	
+	elif ( path.get_extension() == "ogg" ):
+		
+		content = AudioStreamOggVorbis.load_from_file( path )
+	
 	return content
 
 
@@ -1140,6 +1144,8 @@ func find_note( time: float, lane: int ) -> int:
 
 func find_event( time: float, event_name: String ) -> int:
 	
+	print( "finding event ", time )
+	
 	var event_data = chart.get_events_data()
 	var index_left: int = bsearch_left_range( event_data, event_data.size(), time )
 	var index_right: int = bsearch_right_range( event_data, event_data.size(), time )
@@ -1168,19 +1174,13 @@ func find_events( time: float ) -> Array:
 
 func count_events(time: float) -> int:
 	
-	var output = -1
+	var event_data = chart.get_events_data()
+	var index_left: int = bsearch_left_range( event_data, event_data.size(), time )
+	var index_right: int = bsearch_right_range( event_data, event_data.size(), time )
 	
-	for i in chart.get_events_data():
-		
-		if ( !is_equal_approx(i[0], time) ): continue
-		
-		elif ( is_equal_approx(i[0], time) ):
-			
-			output = 1 if output == -1 else output + 1
-			i[0] = time
-		
+	print( index_right + 2 - index_left )
 	
-	return output
+	return index_right + 2 - index_left
 
 
 func find_last_event(time: float) -> int:
@@ -1238,6 +1238,7 @@ func remove_event( time: float, event_name: String ):
 	chart.chart_data.events.remove_at( find_event( time, event_name ) )
 	
 	can_chart = false
+	if count_events(time) == 0: can_chart = true
 	
 	popup_event_editor(time)
 	render_events()

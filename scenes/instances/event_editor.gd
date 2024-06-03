@@ -94,11 +94,7 @@ func _on_add_parameter_pressed():
 
 func _on_remove_event_button_pressed():
 	
-	if events.size() > 1:
-		
-		emit_signal( "event_removed", find_event(current_event)[0], find_event(current_event)[1] )
-		events.remove_at( events.find( find_event(current_event) ) )
-	
+	emit_signal( "event_removed", find_event(current_event)[0], find_event(current_event)[1] )
 	queue_free()
 
 

@@ -96,7 +96,7 @@ dialog_hide_on_ok = true
 file_mode = 0
 access = 2
 root_subfolder = "res://"
-filters = PackedStringArray("*.mp3")
+filters = PackedStringArray("*.mp3", "*.ogg")
 
 [node name="HBoxContainer3" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
@@ -126,7 +126,7 @@ dialog_hide_on_ok = true
 file_mode = 0
 access = 2
 root_subfolder = "res://"
-filters = PackedStringArray("*.mp3")
+filters = PackedStringArray("*.mp3", "*.ogg")
 
 [node name="HSeparator3" type="HSeparator" parent="VBoxContainer"]
 custom_minimum_size = Vector2(0, 20)

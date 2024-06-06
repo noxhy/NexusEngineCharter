@@ -9,10 +9,11 @@ const event_names = {
 	"Screen Shake": "psych_camera_shake",
 	"Set Cam Zoom": "camera_zoom",
 	
-	# Vanilla FnF names
+	# Base Game Names
 	"FocusCamera": "camera_position",
 	"PlayAnimation": "play_animation",
 	"SetCameraBop": "bop_delay",
+	"ZoomCamera": "camera_zoom",
 	
 }
 
@@ -106,13 +107,17 @@ func convert_chart(path: String, chart_type: int) -> Dictionary:
 			var parameters = []
 			
 			var event_name = event
-			if event_names.has( event ): event_name = event
+			if event_names.has( event ): event_name = event_names.get( event )
 			
 			if i.v is Dictionary:
 				
 				for j in i.v: parameters.append( str( i.v.get( j ) ))
 			
 			else: parameters.append( str( i.v ) )
+			
+			if event == "FocusCamera": parameters = [ str( i.v.char ) ]
+			if event == "ZoomCamera": parameters = [ str( i.v.zoom ), str( i.v.duration * ( seconds_per_beat / 16.0 ) ) ]
+			if event == "SetCameraBop": parameters = [ str( i.v.rate * 4 ) ]
 			
 			event_data.append( [ time, event_name, parameters ] )
 	
